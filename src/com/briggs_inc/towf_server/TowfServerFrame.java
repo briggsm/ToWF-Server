@@ -1,12 +1,6 @@
 package com.briggs_inc.towf_server;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.Inet4Address;
 import java.net.InterfaceAddress;
@@ -30,12 +24,7 @@ import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 
 import static com.briggs_inc.towf_server.PacketConstants.*;
-import java.awt.Frame;
-import java.awt.Toolkit;
-import static java.lang.System.out;
 import java.net.InetAddress;
-import java.net.URL;
-import java.util.Arrays;
 import java.util.prefs.Preferences;
 
 
@@ -46,13 +35,11 @@ import java.util.prefs.Preferences;
 public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerListener {
     private static final String TAG = "TowfServerFrame";
     
-    public static final String APP_VERSION = "1.0beta";
+    public static final String APP_VERSION = "2.0";
     
     private Preferences prefs;
     
     // Configuration Properties
-    //private static final String CFG_PROPS_FILENAME = "config.properties";
-    //private static final String CFG_PROPS_FILENAME = "resources/config.properties";
     private static final String AF_SAMPLE_RATE_KEY = "AfSampleRate";
     
     // Audio Format constants
@@ -74,12 +61,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     // My Vars
     InterfaceAddress networkInterfaceIPv4Address;
     List<TowfServerThread> tsThreads;
-    //File cfgPropsFile;
-    //File cfgPropsFile2;
-    //InputStream projPropsInputStream;
     InputStream projPropsInputStream;
-    //OutputStream cfgPropsOutputStream;
-    //Properties cfgProps;
     Properties projProps;
     List<JComboBox<String>> inputSourceCBs;
     List<JTextField> languageTFs;
@@ -94,24 +76,6 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     public TowfServerFrame() {
         Log.i(TAG, "Note: to change LG_LEVEL, edit 'Log.java'");
         initComponents();
-        
-        
-        //Frame f = WindowManager.getDefault().getMainWindow();
-        /*
-        String PROJ_PROPS_FILENAME = "project.properties";
-        projPropsInputStream = getClass().getClassLoader().getResourceAsStream(PROJ_PROPS_FILENAME);
-        projProps = new Properties();
-        try {
-            projProps.load(projPropsInputStream);
-            projPropsInputStream.close();
-        } catch (FileNotFoundException ex) {
-            Log.e(TAG, "ExNote: '" + PROJ_PROPS_FILENAME + "' file not found ().\nExMessage: " + ex.getMessage());
-        } catch (IOException ex) {
-            Log.e(TAG, "ExNote: IO Exception.\nExMessage: " + ex.getMessage());
-        }    
-            
-        this.setTitle("Hello There - " + projProps.getProperty("version", "7.7"));
-        */
         
         prefs = Preferences.userRoot().node(this.getClass().getName());
         
@@ -141,8 +105,6 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         
         tsThreads = new ArrayList<TowfServerThread>();
         
-        //cfgPropsFile = new File(CFG_PROPS_FILENAME);
-        //cfgPropsFromFile2Gui();
         retrievePreferences();
     }
 
@@ -610,7 +572,6 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     private void startThreads() {
         Log.d(TAG, "============= Starting =============");
         // Save cfgProps to File
-        //cfgPropsFromGui2File();  // If user is starting a thread with these values, they're probably worth saving.
         savePreferences();  // If user is starting a thread with these values, they're probably worth saving.
 
         // Display Mixer info's
@@ -683,35 +644,6 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         setRunStateGuiText(false);  // "Stopped"
     }
     
-    /*
-    private void cfgPropsFromFile2Gui() {
-        // Load cfgProps from file
-        try {
-            //cfgPropsInputStream = new FileInputStream(cfgPropsFile);
-            projPropsInputStream = getClass().getClassLoader().getResourceAsStream(CFG_PROPS_FILENAME);
-            cfgProps = new Properties();
-            cfgProps.load(projPropsInputStream);
-            projPropsInputStream.close();
-        } catch (FileNotFoundException ex) {
-            Log.e(TAG, "ExNote: '" + CFG_PROPS_FILENAME + "' file not found (propsFile2Gui).\nExMessage: " + ex.getMessage());
-        } catch (IOException ex) {
-            Log.e(TAG, "ExNote: IO Exception.\nExMessage: " + ex.getMessage());
-        }
-        
-        // Write properties to GUI
-        afSampleRate.setSelectedItem(cfgProps.getProperty(AF_SAMPLE_RATE_KEY, "11025"));
-        
-        netIFsCB.setSelectedItem(cfgProps.getProperty(NETWORK_INTERFACE_NAME, ""));
-        language1TF.setText(cfgProps.getProperty(INPUT_LANGUAGE1, ""));
-        language2TF.setText(cfgProps.getProperty(INPUT_LANGUAGE2, ""));
-        language3TF.setText(cfgProps.getProperty(INPUT_LANGUAGE3, ""));
-        language4TF.setText(cfgProps.getProperty(INPUT_LANGUAGE4, ""));
-        inputSource1CB.setSelectedItem(cfgProps.getProperty(INPUT_SOURCE1, "<None>"));
-        inputSource2CB.setSelectedItem(cfgProps.getProperty(INPUT_SOURCE2, "<None>"));
-        inputSource3CB.setSelectedItem(cfgProps.getProperty(INPUT_SOURCE3, "<None>"));
-        inputSource4CB.setSelectedItem(cfgProps.getProperty(INPUT_SOURCE4, "<None>"));
-    }
-    */
     private void retrievePreferences() {
         afSampleRate.setSelectedItem(prefs.get(AF_SAMPLE_RATE_KEY, "22050"));
         try {
@@ -729,43 +661,6 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         inputSource4CB.setSelectedItem(prefs.get(INPUT_SOURCE4, "<None>"));
     }
     
-    /*
-    private void cfgPropsFromGui2File() {
-        // Set cfgProps from GUI
-        cfgProps.setProperty(AF_SAMPLE_RATE_KEY, afSampleRate.getSelectedItem().toString());
-        
-        cfgProps.setProperty(NETWORK_INTERFACE_NAME, netIFsCB.getSelectedItem().toString());
-        cfgProps.setProperty(INPUT_LANGUAGE1, language1TF.getText());
-        cfgProps.setProperty(INPUT_LANGUAGE2, language2TF.getText());
-        cfgProps.setProperty(INPUT_LANGUAGE3, language3TF.getText());
-        cfgProps.setProperty(INPUT_LANGUAGE4, language4TF.getText());
-        cfgProps.setProperty(INPUT_SOURCE1, inputSource1CB.getSelectedItem().toString());
-        cfgProps.setProperty(INPUT_SOURCE2, inputSource2CB.getSelectedItem().toString());
-        cfgProps.setProperty(INPUT_SOURCE3, inputSource3CB.getSelectedItem().toString());
-        cfgProps.setProperty(INPUT_SOURCE4, inputSource4CB.getSelectedItem().toString());
-        
-        // Save cfgProps to File
-        try {
-            //cfgPropsOutputStream = new FileOutputStream(cfgPropsFile);
-            //cfgPropsOutputStream = getClass().getClassLoader().getResourceAsStream(CFG_PROPS_FILENAME);
-            //URL u = getClass().getResource(CFG_PROPS_FILENAME);
-            URL u = getClass().getClassLoader().getResource(CFG_PROPS_FILENAME);
-            Log.d(TAG, "url: " + u);
-            String s = u.getPath();
-            new File()
-            File f = new File(u);
-            //cfgPropsOutputStream = new FileOutputStream(getClass().getResource(CFG_PROPS_FILENAME).getPath());
-            cfgPropsOutputStream = new FileOutputStream(f);
-                    
-            cfgProps.store(cfgPropsOutputStream, "Program Settings");
-            cfgPropsOutputStream.close();
-        } catch (FileNotFoundException ex) {
-            Log.e(TAG, "ExNote: '" + CFG_PROPS_FILENAME + "' file not found (propsGuiToFile).\nExMessage: " + ex.getMessage());
-        } catch (IOException ex) {
-            Log.e(TAG, "ExNote: IO Exception.\nExMessage: " + ex.getMessage());
-        }
-    }
-    */
     public void savePreferences() {
         prefs.put(AF_SAMPLE_RATE_KEY, afSampleRate.getSelectedItem().toString());
         prefs.put(NETWORK_INTERFACE_NAME, ((NetworkInterface)netIFsCB.getSelectedItem()).getName());
@@ -795,20 +690,16 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         try {
             Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
             for (NetworkInterface netIf : Collections.list(nets)) {
-                //Log.d(TAG, "name: " + netIf.getName());
-                //Log.d(TAG, " displayName: " + netIf.getDisplayName());
-                //Log.d(TAG, " isUp: " + netIf.isUp());
-                //Log.d(TAG, "netIf: " + netIf.toString());
-                
                 Boolean netIfHasIPv4Address = false;
                 Enumeration<InetAddress> inetAddresses = netIf.getInetAddresses();
                 for (InetAddress inetAddress : Collections.list(inetAddresses)) {
                     if (inetAddress instanceof Inet4Address) {
                         netIfHasIPv4Address = true;
                     }
-                }
+                }                
                 
                 /*
+                // *** Keep for debug ***
                 out.printf("Display name: %s\n", netIf.getDisplayName());
                 out.printf("Name: %s\n", netIf.getName());
                 Enumeration<InetAddress> inetAddresses = netIf.getInetAddresses();
@@ -834,7 +725,6 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                 */
         
                 if (netIf.isUp() && netIfHasIPv4Address && !netIf.isLoopback()) {
-                    //netIFsCB.addItem(netIf.getName());
                     netIFsCB.addItem(netIf);
                 }
             }
