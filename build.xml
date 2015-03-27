@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See commented blocks below for -->
+<!-- some examples of how to customize the build. -->
+<!-- (If you delete it and reopen the project it will be recreated.) -->
+<!-- By default, only the Clean and Build commands use this build script. -->
+<!-- Commands such as Run, Debug, and Test only use this build script if -->
+<!-- the Compile on Save feature is turned off for the project. -->
+<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
+<!-- in the project's Project Properties dialog box.-->
+<project name="ToWF_Server" default="default" basedir=".">
+    <description>Builds, tests, and runs the project ToWF Server.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <!--
+
+    There exist several targets which are by default empty and which can be 
+    used for execution of your tasks. These targets are usually executed 
+    before and after some main targets. They are: 
+
+      -pre-init:                 called before initialization of project properties
+      -post-init:                called after initialization of project properties
+      -pre-compile:              called before javac compilation
+      -post-compile:             called after javac compilation
+      -pre-compile-single:       called before javac compilation of single file
+      -post-compile-single:      called after javac compilation of single file
+      -pre-compile-test:         called before javac compilation of JUnit tests
+      -post-compile-test:        called after javac compilation of JUnit tests
+      -pre-compile-test-single:  called before javac compilation of single JUnit test
+      -post-compile-test-single: called after javac compilation of single JUunit test
+      -pre-jar:                  called before JAR building
+      -post-jar:                 called after JAR building
+      -post-clean:               called after cleaning build products
+
+    (Targets beginning with '-' are not intended to be called on their own.)
+
+    Example of inserting an obfuscator after compilation could look like this:
+
+        <target name="-post-compile">
+            <obfuscate>
+                <fileset dir="${build.classes.dir}"/>
+            </obfuscate>
+        </target>
+
+    For list of available properties check the imported 
+    nbproject/build-impl.xml file. 
+
+
+    Another way to customize the build is by overriding existing main targets.
+    The targets of interest are: 
+
+      -init-macrodef-javac:     defines macro for javac compilation
+      -init-macrodef-junit:     defines macro for junit execution
+      -init-macrodef-debug:     defines macro for class debugging
+      -init-macrodef-java:      defines macro for class execution
+      -do-jar:                  JAR building
+      run:                      execution of project 
+      -javadoc-build:           Javadoc generation
+      test-report:              JUnit report generation
+
+    An example of overriding the target for project execution could look like this:
+
+        <target name="run" depends="ToWF_Server-impl.jar">
+            <exec dir="bin" executable="launcher.exe">
+                <arg file="${dist.jar}"/>
+            </exec>
+        </target>
+
+    Notice that the overridden target depends on the jar target and not only on 
+    the compile target as the regular run target does. Again, for a list of available 
+    properties which you can use, check the target you are overriding in the
+    nbproject/build-impl.xml file. 
+
+    -->
+    
+    
+    <!--target name="-pre-init">
+        <property name="project.pretty_name" value="ToWF Server" />
+        <property name="project.system_name" value="ToWF_Server" />
+        <property name="version.num" value="1.1" />
+        <property name="dist.jar" value="dist/${project.system_name}-${version.num}.jar" />
+        <tstamp>
+           <format property="NOW" pattern="yyyy-MM-dd HH:mm:ss z" />
+        </tstamp>
+
+        <manifest file="MANIFEST.MF">
+           <attribute name="Bundle-Name" value="${project.name}" />           
+           <attribute name="Bundle-Version" value="${version.num}" />
+           <attribute name="Bundle-Date" value="${NOW}" />
+           <attribute name="Implementation-Title" value="${project.name}" />
+           <attribute name="Implementation-Version" value="${version.num}" />
+           <attribute name="Implementation-URL" value="http://www.example.com" />
+        </manifest>
+
+    </target-->
+    
+    
+    
+    <!--
+    <property name='build' location='build' />
+    <property name='app.name' value='Example App'/>
+    <property name='app.version' value='1.5'/>
+    <property name='distro-name' value='example-app-${app.version}'/>
+    <tstamp><format property='build.time' pattern='yyyy-MM-dd HH:mm:ss'/></tstamp>
+
+    <fileset id='files.for.jar' dir='src'>
+        <exclude name='**/*.java'/>
+        <exclude name='**/doc-files/'/>
+    </fileset>
+  
+    <echo>
+    Application: ${app.name} ${app.version}
+    Build File : ${ant.file} 
+    Run Date   : ${build.time}
+    Run by     : ${user.name}
+    Build Dir  : ${build}
+    Base Dir   : ${basedir}
+    Java Home  : ${java.home}
+    Deployment host running: ${deployment.server.running}
+    Connected to the web   : ${jdk.javadoc.visible}
+    </echo>
+    
+    <target name='jar' description='Create a jar file for distribution.' depends='compile'>
+    <jar destfile='${build}/dist/${distro-name}.jar' manifest='MANIFEST.MF' duplicate='preserve'>
+      <fileset refid='files.for.jar'/>
+      <manifest>
+        <attribute name='Specification-Version' value='${app.version}'/> 
+        <attribute name='Specification-Title' value='${app.name}' />
+        <attribute name='Implementation-Version' value='${app.version}'/> 
+        <attribute name='Implementation-Title' value='${app.name}' />
+      </manifest>
+    </jar>
+   </target>
+    -->
+   
+   
+
+</project>
