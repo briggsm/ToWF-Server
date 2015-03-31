@@ -131,6 +131,7 @@ public class TowfServerThread extends Thread implements LineListener {
             // Setup Datagram Socket & Datagram Packet
             try {
                 bcSock = new DatagramSocket(dstSocketPort, networkInterfaceAddress.getAddress());  // Note: port (srcSocketPort) doesn't really matter (I think), will just use same as dstSocketPort.
+                bcSock.setTrafficClass(0xC0);  // Voice (<10ms latency) [http://wiki.ubnt.com/Main_Page/QoS_DSCP/TOS_Mappings]
                 byte tempArr[] = new byte[UDP_DATA_SIZE];
                 bcAudioDatagramPacket = new DatagramPacket(tempArr, UDP_DATA_SIZE, networkInterfaceAddress.getBroadcast(), dstSocketPort);
             } catch (SocketException ex) {
