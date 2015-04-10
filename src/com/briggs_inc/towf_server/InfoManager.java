@@ -24,6 +24,7 @@ import java.util.TimerTask;
 interface InfoManagerListener {
     public void onClientListening(ListeningClientInfo listeningClientInfo);
     public void onClientNotListening(ListeningClientInfo listeningClientInfo);
+    public void onMissingPacketsRequestReceived(int port, List<SeqId> mprList);
 }
 
 public class InfoManager {
@@ -66,7 +67,7 @@ public class InfoManager {
         public void run() {
             while (true) {
                 try {
-                    infoSocket.receive(infoRecvDgPk);
+                    infoSocket.receive(infoRecvDgPk);  // Hangs (blocks) here until packet is received... (but doesn't use CPU resources while blocking) [But since this should be on a thread of it's own, it's ok]
                 } catch (IOException ex) {
                     Logger.getLogger(InfoManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -138,6 +139,29 @@ public class InfoManager {
                 }
                 
                 break;
+            case DG_DATA_HEADER_PAYLOAD_TYPE_MISSING_PACKETS_REQUEST:
+                //Log.d(TAG, "Missing Packets request came in...");
+                
+                // Add all missing packets to packetsToResend list (all will get sent just before the next 'regular' packet gets sent out)
+                int numMissingPackets = Util.getIntFromByteArray(dgData, MPRPL_NUM_MISSING_PACKETS_START, MPRPL_NUM_MISSING_PACKETS_LENGTH, false);
+                int port = Util.getIntFromByteArray(dgData, MPRPL_PORT_START, MPRPL_PORT_LENGTH, false);
+                
+                String s = "";
+                //int missingPacketsArr[] = new int[numMissingPackets];
+                List<SeqId> mprList = new ArrayList<SeqId>();
+                for (int i = 0; i < numMissingPackets; i++) {
+                    //missingPacketsArr[i] = Util.getIntFromByteArray(dgData, MPRPL_PACKET0_SEQID_START + (i*2), MPRPL_PACKET0_SEQID_LENGTH, false);
+                    mprList.add(new SeqId(Util.getIntFromByteArray(dgData, MPRPL_PACKET0_SEQID_START + (i*2), MPRPL_PACKET0_SEQID_LENGTH, false)));
+                    //Log.d(TAG, " " + String.format("0x%04x", missingPacketsArr[i]));
+                    //s += String.format("0x%04x, ", missingPacketsArr[i]);
+                    s += String.format("0x%04x, ", mprList.get(i).intValue);
+                }
+                Log.d(TAG, "Missing Packets request (" + numMissingPackets + ") came in from {" + ((Inet4Address)dg.getAddress()).getHostAddress() + "}: (" + s + ")");
+                
+                //notifyListenersOnMissingPacketsRequestReceived(port, missingPacketsArr);
+                notifyListenersOnMissingPacketsRequestReceived(port, mprList);
+                
+                break;
             default:
                 System.out.println("Hmm, payload type UNKNOWN in onInfoDgPkReceived. Type: " + payloadType);
                 return;  // nothing to do
@@ -195,6 +219,13 @@ public class InfoManager {
     private void notifyListenersOnClientNotListening(ListeningClientInfo listeningClientInfo) {
         for (InfoManagerListener listener : listeners) {
             listener.onClientNotListening(listeningClientInfo);
+        }
+    }
+    
+    //private void notifyListenersOnMissingPacketsRequestReceived(int port, int[] missingPacketsArr) {
+    private void notifyListenersOnMissingPacketsRequestReceived(int port, List<SeqId> mprList) {
+        for (InfoManagerListener listener : listeners) {
+            listener.onMissingPacketsRequestReceived(port, mprList);
         }
     }
 }

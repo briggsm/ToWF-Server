@@ -817,5 +817,15 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
             }
         }
     }
+
+    @Override
+    public void onMissingPacketsRequestReceived(int port, List<SeqId> mprList) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        for (TowfServerThread tsThread : tsThreads) {
+            if (tsThread.getDstPortNumber() == port) {
+                tsThread.handleMissingPacketsRequest(mprList);
+            }
+        }
+    }
 }
 
