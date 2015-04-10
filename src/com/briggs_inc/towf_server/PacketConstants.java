@@ -14,16 +14,8 @@ public class PacketConstants {
     public static final int UDP_DATA_SIZE = UDP_PACKET_SIZE - UDP_HEADER_SIZE - IPV4_HEADER_SIZE - ETH_HEADER_SIZE; //512-42=470
     public static final int UDP_PAYLOAD_SIZE = UDP_DATA_SIZE - DG_DATA_HEADER_LENGTH;  // 470-6=464
     
-    /*
-    public static final int PACKET_SEQ_ID_SIZE = 2;
-    public static final int AUDIO_LENGTH_SIZE = 2;
-    public static final int UDP_AUDIO_DATA_PAYLOAD_HEADER_SIZE = PACKET_SEQ_ID_SIZE + AUDIO_LENGTH_SIZE;
-    public static final int UDP_AUDIO_DATA_AVAILABLE_SIZE = UDP_PAYLOAD_SIZE - UDP_AUDIO_DATA_PAYLOAD_HEADER_SIZE; //464-4=460
-    */
-    
     public static final int INFO_DST_SOCKET_PORT_NUMBER = 7769;
     public static final int STARTING_STREAM_PORT_NUMBER = 7770;
-    
     
     public static final int ToWF_AS_INT = 0x546F5746;  // "ToWF"
     

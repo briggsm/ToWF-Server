@@ -8,13 +8,9 @@ import javax.sound.sampled.*;
 
 import static com.briggs_inc.towf_server.PacketConstants.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,31 +72,20 @@ public class TowfServerThread extends Thread implements LineListener {
     // Unicast Clients
     List<Inet4Address> unicastClients = new ArrayList<Inet4Address>();
     
-    //PcmAudioDataPayload pcmAudioDataPayloadStorage[] = new PcmAudioDataPayload[0xFFFF];
-    //byte[][] pcmAudioDataPayloadStorage = new byte[0x10000][UDP_DATA_SIZE];
     SyncPcmAudioDataPayloadStorageContainer syncPcmAudioDataPayloadStorageContainer = new SyncPcmAudioDataPayloadStorageContainer();
     
-    //int[] missingPacketsList; //?????
-    //List<Integer> missingPacketsList = new CopyOnWriteArrayList<Integer>();
-    //List<Integer> missingPacketsList = new ArrayList<Integer>();
-    
-    //Boolean comeAndGetMissingPackets = false;
     SyncMissingPacketsSeqIdsContainer syncMissingPacketsSeqIdsContainer = new SyncMissingPacketsSeqIdsContainer();
     
     Timer sendPacketTimer = new Timer();
     long sendPacketRateMS;
     
-    
     class SendPacketTask extends TimerTask {
         @Override
         public void run() {
-            
-            //sendPacketToSocket();
             TowfServerThread.this.sendPacketToSocket();
         }
     }
 
-    //public TowfServerThread(TowfServerFrame f, AudioFormat af, String multicastStreamIp, int multicastStreamPort, String broadcastStreamIp, int broadcastStreamPort) {
     public TowfServerThread(TowfServerFrame f, AudioFormat af, String mixerName, String language, InterfaceAddress networkInterfaceAddress, int dstSocketPort) {
         this.f = f;
         this.audioFormat = af;
@@ -201,7 +186,6 @@ public class TowfServerThread extends Thread implements LineListener {
             return;  // Nothing to do. This thread is done.
         }
         
-        
         sendPacketTimer.scheduleAtFixedRate(new SendPacketTask(), 0, sendPacketRateMS);
         
         line.start();
@@ -245,48 +229,12 @@ public class TowfServerThread extends Thread implements LineListener {
             dbgEndTime = System.nanoTime();
             Log.v(TAG, "[" + language + "]Time from last MicDataRead to this MicDataRead (us): " + (dbgEndTime - dbgStartTime) / 1000);
             dbgStartTime = System.nanoTime();
-
-            //sendAudioDataToSocket();
         }
 
         // Clean up resource usage
         cleanUp();
     }
 
-    /*
-    void readAudioDataFromMic() {
-        Log.v(TAG, "[" + language + "]--------------------------");
-        Log.v(TAG, "[" + language + "]readAudioDataFromMic()");
-
-        // Debug timer vars
-        long dbgStartTime;
-        long dbgEndTime;
-        dbgStartTime = System.nanoTime();
-
-        lineAvailable = line.available();
-        Log.v(TAG, " [" + language + "]lineAvailable: " + lineAvailable);
-
-        if (lineAvailable > micLineAvailableMax) {
-            micLineAvailableMax = lineAvailable;
-        }
-
-        dbgEndTime = System.nanoTime();
-        Log.v(TAG, "[" + language + "]Time to BEFORE line.read (us): " + (dbgEndTime - dbgStartTime) / 1000);
-
-        Log.v(TAG, " [" + language + "]*line.read()");
-        micDataLength = line.read(micData, 0, micData.length);
-
-        dbgEndTime = System.nanoTime();
-        Log.v(TAG, "[" + language + "]Time to AFTER line.read (us): " + (dbgEndTime - dbgStartTime) / 1000);
-
-        //Log.v(TAG, "[" + language + "] micDta: ", false);
-        //outputDataSummary(micData, micDataLength, 8);
-
-        if (micDataLength != micData.length) {
-            Log.w(TAG, "[" + language + "] -=-=-=-= Hey! micDataLength != micData.length What happened?! micDataLength: " + micDataLength + ", micData.length: " + micData.length + " -=-=-=-=");
-        }
-    }
-    */
     void readAudioDataFromMic() {
         Log.v(TAG, "[" + language + "]--------------------------");
         Log.v(TAG, "[" + language + "]readAudioDataFromMic()");
@@ -307,18 +255,8 @@ public class TowfServerThread extends Thread implements LineListener {
         
         int numPayloadsToRead = lineAvailable / audioDataMaxValidSize;
         
-        /*
-        int lengthRead = 0;
-        byte tempMicData[] = new byte[lineAvailable];
-        lengthRead = line.read(tempMicData, 0, lineAvailable);
-        Log.d(TAG, " [" + language + "]lengthRead: " + lengthRead);
-        */
-        //byte tempDgData[] = new byte[UDP_DATA_SIZE];
         byte tempAudioData[] = new byte[audioDataMaxValidSize];
-        //Util.writeDgDataHeaderToByteArray(tempDgData, DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_REGULAR);
         line.read(tempAudioData, 0, audioDataMaxValidSize);
-        //Util.putIntInsideByteArray();
-        //syncPcmAudioDataPayloadStorageContainer.addPayloadFromDgData(tempDgData);
         syncPcmAudioDataPayloadStorageContainer.addPayloadFromAudioData(tempAudioData);
     }
 
@@ -350,7 +288,7 @@ public class TowfServerThread extends Thread implements LineListener {
             }
         }
         
-        // Then send the regularly scheduled packets
+        // Then send the regularly scheduled packet
         if (syncPcmAudioDataPayloadStorageContainer.getNextPayloadToSend(dgData)) {
             Util.writeDgDataHeaderToByteArray(dgData, DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_REGULAR);
             
@@ -370,160 +308,6 @@ public class TowfServerThread extends Thread implements LineListener {
             }
         } else {
             Log.v(TAG, " [" + language + "]<TimerThread>No Regular Payload To send this time (MS): " + System.nanoTime() / 1000000);
-        }
-    }
-    
-    void sendAudioDataToSocket123() {
-        // FIRST, send the Missing Packets (if any),
-        // THEN, send the regularly scheduled packet(s) AND save the packet(s) to SavedPacketsStorage
-        Log.v(TAG, "[" + language + "]sendAudioDataToSocket()");
-
-        int audioDataCtr = 0;
-        int seqId = 0;
-        int currAudioDataLength = micDataLength;
-
-        long dbgStartTime;
-        long dbgEndTime;
-        dbgStartTime = System.nanoTime();
-
-        while (micDataLength > 0) {
-            // First, send Missing Packets (if any)
-            
-            //if (comeAndGetMissingPackets) {
-            //}
-            
-            //if (missingPacketsList.size() > 0) {
-            if (syncMissingPacketsSeqIdsContainer.getSize() > 0) {
-                //Log.d(TAG, "We've heard there are some (" + missingPacketsList.size() + ") MISSING PACKETS (" + getMissingPacketsSeqIdsAsHexString(missingPacketsList) + "). Resending them now.");
-                Log.d(TAG, "We've heard there are some (" + syncMissingPacketsSeqIdsContainer.getSize() + ") MISSING PACKETS (though, as we send, more MAY be added). Start Resending now.");
-
-                // Copy the Array List so if the original if modified by another thread, we'll be ok
-                //List<Integer> missingPacketsListCopy = new ArrayList<Integer>(missingPacketsList);  // Shallow copy should be enough.
-
-                //Log.d(TAG, " MISSING PACKETS2: " + getMissingPacketsSeqIdsAsHexString(missingPacketsListCopy));
-                
-                // Sort the list
-                //Collections.sort(missingPacketsListCopy);
-                
-                //Log.d(TAG, " MISSING PACKETS3: " + getMissingPacketsSeqIdsAsHexString(missingPacketsListCopy));
-
-                // Send each missing packet
-                //Iterator<Integer> mpIter = missingPacketsListCopy.iterator();
-                //while (mpIter.hasNext()) {
-                //while (syncMissingPacketsSeqIdsContainer.getSize() > 0) {
-                SeqId mpSeqId;
-                while ((mpSeqId = syncMissingPacketsSeqIdsContainer.popFirstSeqId()) != null) {
-                    //int mpSeqId = mpIter.next();
-                    //SeqId mpSeqId = syncMissingPacketsSeqIdsContainer.popFirstSeqId();  // Get it AND remove it from list.
-                    Log.d(TAG, String.format("mpSeqId: 0x%04x", mpSeqId.intValue));
-                    //dgData = pcmAudioDataPayloadStorage[mpSeqId.intValue];
-                    //dgData = syncPcmAudioDataPayloadStorageContainer.getPayloadCopy(mpSeqId);
-                    Util.writeDgDataHeaderToByteArray(dgData, DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING);
-                    syncPcmAudioDataPayloadStorageContainer.getPayloadCopyToDgData(mpSeqId, dgData);
-                            
-                    
-                    
-                    Log.d(TAG, "MP-dgData: ", false);
-                    outputDataSummary(dgData, dgData.length, 14);
-
-                    bcAudioDatagramPacket.setData(dgData);
-                    bcAudioDatagramPacket.setLength(dgData.length);
-                    bcAudioDatagramPacket.setAddress(networkInterfaceAddress.getBroadcast());
-                    Log.d(TAG, "[" + language + "]broadcast bcSock.send() <Missing> (" + String.format("0x%04x", mpSeqId.intValue) + ")");
-                    try {
-                        // Have a nice trip!
-                        bcSock.send(bcAudioDatagramPacket);
-                    } catch (IOException ex) {
-                        Log.e(TAG, "[" + language + "]ExNote: Sending <Missing> audioDatagram over socket FAILED!\nExMessage: " + ex.getMessage());
-                    }
-                }
-
-                // Delete the original Missing Packets list
-                //missingPacketsList.clear();  // Note: "IF" another thread adds a packet to this list while we're iterating above, this call will blast away that change, but it's ok 'cuz out protocol will handle it (the Receiver will just just another Missing Pakcet Request)
-            }
-        
-            // Then send the regularly scheduled packets
-            seqId = numPacketsSent & 0xFFFF;
-            Log.d(TAG, "seqId of this Regulary Scheduled Packet: " + String.format("0x%04x", seqId));
-            currAudioDataLength = Math.min(micDataLength, audioDataMaxValidSize);
-
-            Util.writeDgDataHeaderToByteArray(dgData, DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_REGULAR);
-            dgData[DG_DATA_HEADER_LENGTH + 0] = (byte) (seqId & 0xFF);
-            dgData[DG_DATA_HEADER_LENGTH + 1] = (byte) ((seqId & 0xFF00) >> 8);
-            dgData[DG_DATA_HEADER_LENGTH + 2] = (byte) (currAudioDataLength & 0xFF);
-            dgData[DG_DATA_HEADER_LENGTH + 3] = (byte) ((currAudioDataLength & 0xFF00) >> 8);
-            
-            // !! Keep for debug.
-            //dbgEndTime = System.nanoTime();
-            //Log.v(TAG, "[" + language + "] Time from start sending packets to BEFORE array copy loop (us)" + (dbgEndTime - dbgStartTime) / 1000);
-            // Now copy in the audio data
-            for (int ctr = 0; ctr < currAudioDataLength; ctr++) {
-                //dgData[ctr + DG_DATA_HEADER_LENGTH + PACKET_SEQ_ID_SIZE + AUDIO_LENGTH_SIZE] = micData[audioDataCtr];
-                //dgData[ctr + DG_DATA_HEADER_LENGTH + ADPL_HEADER_SEQ_ID_LENGTH + ADPL_HEADER_AUDIO_DATA_ALLOCATED_BYTES_LENGTH] = micData[audioDataCtr];
-                dgData[ctr + ADPL_AUDIO_DATA_START] = micData[audioDataCtr];
-
-                // Save to file...
-                // !!!!! Save this in case need to debug later !!!!!
-                //fos.write(audioData[audioDataCtr]);
-                audioDataCtr++;
-            }
-
-            // !! Keep for debug.
-            //dbgEndTime = System.nanoTime();
-            //Log.v(TAG, "[" + language + "] Time from start sending packets to AFTER array copy loop (us)" + (dbgEndTime - dbgStartTime) / 1000);
-            
-            //Log.v(TAG, "[" + language + "] dgData: ", false);
-            //outputDataSummary(dgData, dgData.length, 10);
-            //Log.d(TAG, "MPR2-dgData: ", false);
-            //outputDataSummary(dgData, dgData.length, 14);
-
-            // Save dgData to Storage, in case any Receiver(s) find it Missing
-            //Log.d(TAG, "seqId2 of this Regulary Scheduled Packet: " + String.format("0x%04x", seqId));
-            
-            //System.arraycopy(dgData, 0, pcmAudioDataPayloadStorage[seqId], 0, dgData.length);
-            //syncPcmAudioDataPayloadStorageContainer.addPayloadFromDgData(dgData);
-            syncPcmAudioDataPayloadStorageContainer.addPayloadFromAudioData(micData);
-            
-            //????? Do I even need to do this?!!!!! ??????
-            bcAudioDatagramPacket.setData(dgData);
-            bcAudioDatagramPacket.setLength(dgData.length);
-
-            // !! Keep for debug.
-            //dbgEndTime = System.nanoTime();
-            //Log.v(TAG, "[" + language + "] Time from start sending packets to BEFORE sock.send(packet) (us)" + (dbgEndTime - dbgStartTime) / 1000);
-            //System.out.println("broadcast bcSock.send()");
-            bcAudioDatagramPacket.setAddress(networkInterfaceAddress.getBroadcast());
-            Log.v(TAG, "[" + language + "]broadcast bcSock.send() <Regular>");
-            try {
-                // Have a nice trip!
-                bcSock.send(bcAudioDatagramPacket);
-            } catch (IOException ex) {
-                Log.e(TAG, "[" + language + "]ExNote: Sending <Regular> audioDatagram over socket FAILED!\nExMessage: " + ex.getMessage());
-            }
-            
-            // Now also send to all unicastClients
-            // !!! Keep, in case need to add it back in later !!!
-            /*
-            for (Inet4Address unicastClient : unicastClients) {
-                System.out.println("for-each loop: " + unicastClient.getHostAddress());
-                bcAudioDatagramPacket.setAddress(unicastClient);
-                try {
-                    // Have a nice trip!
-                    //mcSock.send(audioDatagram);
-                    bcSock.send(bcAudioDatagramPacket);
-                } catch (IOException ex) {
-                    Log.v(TAG, "[" + language + "]ExNote: Sending audioDatagram over socket FAILED!\nExMessage: " + ex.getMessage());
-                }
-            }
-            */
-
-            // !! Keep for debug.
-            //dbgEndTime = System.nanoTime();
-            //Log.v(TAG, "[" + language + "] Time from start sending packets to AFTER sock.send(packet) (us)" + (dbgEndTime - dbgStartTime) / 1000);
-            numPacketsSent++;
-            Log.v(TAG, "[" + language + "] numPacketsSent: " + numPacketsSent);
-
-            micDataLength -= currAudioDataLength;
         }
     }
     
@@ -659,34 +443,7 @@ public class TowfServerThread extends Thread implements LineListener {
         unicastClients.clear();
     }
     
-    //public void handleMissingPacketsRequest(int[] missingPacketsArr) {
     public void handleMissingPacketsRequest(List<SeqId> mprList) {
-        // Copy to our local missingPacketsList (will get sent right before the next regularly scheduled packet gets sent out)
-        // Note: the func that resends these missing packets is on another thread, and when finished will clear() this.missingPacketsList - usually this
-        //      will be fine, but there'll be a small window the it'll get deleted while we're adding missing packets to the list.  But that's ok because
-        //      out protocol will handle it (when the Receiver sees that it didn't receive the missing packets again, it will resend the Missing Packet Request)
-        
-        //comeAndGetMissingPackets = true;
-        
-        /*
-        //Log.d(TAG, "handleMissingPacketsRequest(" + missingPacketsArr.length + ")");
-        Log.d(TAG, "handleMissingPacketsRequest [" + missingPacketsArr.length + "]");
-        Log.d(TAG, "hMPR() - ThreadName running this code: " + Thread.currentThread().getName());
-        for (int i = 0; i < missingPacketsArr.length; i++) {
-            Log.d(TAG, " loop[" + i + "] => " + String.format("0x%04x", missingPacketsArr[i]));
-            if (!this.missingPacketsList.contains(new Integer(missingPacketsArr[i]))) {
-                Log.d(TAG, "  adding it (" + String.format("0x%04x", missingPacketsArr[i]) + ") to missingPacketsList (" + getMissingPacketsSeqIdsAsHexString(missingPacketsList) + ")");
-                this.missingPacketsList.add(new Integer(missingPacketsArr[i]));
-            }
-        }
-        */
-        
-        /*
-        for (int i = 0; i < missingPacketsArr.length; i++) {
-            syncMissingPacketsSeqIdsContainer.add(missingPacketsArr[i]);
-        }
-        */
-        
         syncMissingPacketsSeqIdsContainer.addList(mprList);
     }
 

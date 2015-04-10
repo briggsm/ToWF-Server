@@ -17,25 +17,16 @@ public class SyncMissingPacketsSeqIdsContainer {
     private static final String TAG = "SyncMPSeqIdsCont";
     
     // This variable will potentially be accessed by multiple threads - make sure all access is synchronized!
-    //List<Integer> missingPacketsList = new ArrayList<Integer>();
     List<SeqId> missingPacketsList = new ArrayList<SeqId>();
     
     public SyncMissingPacketsSeqIdsContainer() {
     
     }
     
-    
     public synchronized int getSize() {
         return missingPacketsList.size();
     }
     
-    /*
-    public synchronized void add(SeqId s) {
-        // Add & Sort
-        missingPacketsList.add(s);
-        Collections.sort(missingPacketsList);
-    }
-    */
     public synchronized void addList(List<SeqId> seqIdList) {
         Log.v(TAG, "addList()");
         if (seqIdList.size() > 0) {
@@ -64,9 +55,6 @@ public class SyncMissingPacketsSeqIdsContainer {
     
     public synchronized SeqId popFirstSeqId() {
         if (this.getSize() > 0) {
-            //SeqId firstSeqId = missingPacketsList.get(0);
-            //missingPacketsList.remove(0);
-            //return firstSeqId;
             return missingPacketsList.remove(0);  // Remove() also gives back the element that was removed.
         } else {
             return null;
