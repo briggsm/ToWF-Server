@@ -42,6 +42,7 @@ public class ListeningClientsTableModel extends AbstractTableModel {
             //"Listening");
     List<ListeningClientInfo> listeningClients = new ArrayList<ListeningClientInfo>();
     
+    InfoManager infoManager;
     
     @Override
     public int getRowCount() {
@@ -112,6 +113,7 @@ public class ListeningClientsTableModel extends AbstractTableModel {
             case COL_ENABLE_MPRS:
                 lc.EnableMPRs = (Boolean) aValue;
                 fireTableCellUpdated(rowIndex, columnIndex);
+                infoManager.sendEnableMPRs(lc.IPAddress, lc.EnableMPRs);
                 break;
             default:
                 break;
@@ -190,5 +192,9 @@ public class ListeningClientsTableModel extends AbstractTableModel {
             }
         }
         return -1;  // Not found
+    }
+
+    void setInfoManager(InfoManager infoManager) {
+        this.infoManager = infoManager;
     }
 }

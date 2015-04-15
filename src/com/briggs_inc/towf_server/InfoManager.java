@@ -212,6 +212,26 @@ public class InfoManager {
         langPortPairsDgPacket = new DatagramPacket(lppArr, UDP_DATA_SIZE, broadcastAddress, INFO_DST_SOCKET_PORT_NUMBER);
     }
     
+    public void sendEnableMPRs(Inet4Address ipAddress, boolean enabled) {
+        byte enMPRsArr[] = new byte[DG_DATA_HEADER_LENGTH + 1];
+        
+        // "ToWF" Header
+        Util.writeDgDataHeaderToByteArray(enMPRsArr, DG_DATA_HEADER_PAYLOAD_TYPE_ENABLE_MPRS);
+        
+        // Enabled / Disabled
+        Util.putIntInsideByteArray(enabled ? 1 : 0, enMPRsArr, ENMPRS_ENABLED_START, ENMPRS_ENABLED_LENGTH, false);
+        
+        // Build the Datagram Packet
+        DatagramPacket dgPk = new DatagramPacket(enMPRsArr, enMPRsArr.length, ipAddress, INFO_DST_SOCKET_PORT_NUMBER);
+        
+        // Try to send it out over the network
+        try {
+            infoSocket.send(dgPk);
+        } catch (IOException ex) {
+            Logger.getLogger(InfoManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     private void notifyListenersOnClientListening(ListeningClientInfo listeningClientInfo) {
         for (InfoManagerListener listener : listeners) {
             listener.onClientListening(listeningClientInfo);

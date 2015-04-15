@@ -102,13 +102,15 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         languageTFs.add(language3TF);
         languageTFs.add(language4TF);
         
-        // Setup listeningClientsTable
-        lcTableModel = new ListeningClientsTableModel();
-        listeningClientsTable.setModel(lcTableModel);
-        
+        // Info Manager
         infoManager = new InfoManager();
         infoManager.addListener(this);
         infoManager.startReceiving();
+        
+        // Setup listeningClientsTable
+        lcTableModel = new ListeningClientsTableModel();
+        lcTableModel.setInfoManager(infoManager);
+        listeningClientsTable.setModel(lcTableModel);
         
         lookupAndDisplayNetIFs();
         populateInputSourceComboBoxes();
