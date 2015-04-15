@@ -123,6 +123,7 @@ public class InfoManager {
                 
                 // === Populate the ListeningClientInfo STRUCT ===
                 ListeningClientInfo cInfo = new ListeningClientInfo();
+                // Received from Client itself
                 cInfo.IsListening = Util.getIntFromByteArray(dgData, CLPL_IS_LISTENING_START, CLPL_IS_LISTENING_LENGTH, false) == 1 ? true : false;
                 cInfo.OsType = Util.getIntFromByteArray(dgData, CLPL_OS_TYPE_START, CLPL_OS_TYPE_LENGTH, false);
                 cInfo.Port = Util.getIntFromByteArray(dgData, CLPL_PORT_START, CLPL_PORT_LENGTH, false);
@@ -132,6 +133,11 @@ public class InfoManager {
                 cInfo.HwModel = Util.getNullTermStringFromByteArray(dgData, CLPL_HW_MODEL_STR_START, CLPL_HW_MODEL_STR_LENGTH);
                 cInfo.UsersName = Util.getNullTermStringFromByteArray(dgData, CLPL_USERS_NAME_START, CLPL_USERS_NAME_LENGTH);
 
+                // Other info
+                cInfo.EnableMPRs = new Boolean(true);
+                cInfo.NumMPRs = 0;
+                //cInfo.listeningToggle = new Boolean(false);
+                
                 if (cInfo.IsListening) {
                     notifyListenersOnClientListening(cInfo);
                 } else {

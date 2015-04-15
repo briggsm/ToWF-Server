@@ -9,6 +9,7 @@ import java.net.Inet4Address;
 
 // Note: Used as a STRUCT
 public class ListeningClientInfo {
+    // Received from Client itself
     public boolean IsListening;
     public int OsType;
     public int Port;
@@ -17,6 +18,11 @@ public class ListeningClientInfo {
     public String HwManufacturer;
     public String HwModel;
     public String UsersName;
+    
+    // Other info
+    public Boolean EnableMPRs;
+    public int NumMPRs;
+    //public Boolean listeningToggle;
 
     @Override
     public boolean equals(Object obj) {

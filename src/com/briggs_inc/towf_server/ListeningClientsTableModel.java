@@ -14,13 +14,17 @@ import static com.briggs_inc.towf_server.PacketConstants.*;
  */
 public class ListeningClientsTableModel extends AbstractTableModel {
 
-    private static final int COL_OS_TYPE = 0;
-    private static final int COL_OS_VERSION = 1;
-    private static final int COL_IP_ADDRESS = 2;
-    private static final int COL_HW_MANUFACTURER = 3;
-    private static final int COL_HW_MODEL = 4;
-    private static final int COL_PORT = 5;
-    private static final int COL_USERS_NAME = 6;
+    public static final int COL_OS_TYPE = 0;
+    public static final int COL_OS_VERSION = 1;
+    public static final int COL_IP_ADDRESS = 2;
+    public static final int COL_HW_MANUFACTURER = 3;
+    public static final int COL_HW_MODEL = 4;
+    public static final int COL_PORT = 5;
+    public static final int COL_USERS_NAME = 6;
+    public static final int COL_ENABLE_MPRS = 7;
+    public static final int COL_NUM_MPRS = 8;
+    public static final int COL_CHAT = 9;
+    //public static final int COL_LISTENING = 10;
             
     // Column Names - NOTE: Make sure this order matches with the COL Constants above!
     List<String> columnNames = Arrays.asList(
@@ -30,7 +34,11 @@ public class ListeningClientsTableModel extends AbstractTableModel {
             "HW Manufacturer",
             "HW Model",
             "Port",
-            "User/Device Name");
+            "User/Device Name",
+            "Enable MPR's",
+            "# MPR's",
+            "Chat");
+            //"Listening");
     List<ListeningClientInfo> listeningClients = new ArrayList<ListeningClientInfo>();
     
     
@@ -42,6 +50,16 @@ public class ListeningClientsTableModel extends AbstractTableModel {
     @Override
     public int getColumnCount() {
         return columnNames.size();
+    }
+
+    /*
+    * JTable uses this method to determine the default renderer/
+    * editor for each cell.  If we didn't implement this method,
+    * then the last column would contain text ("true"/"false"),
+    * rather than a check box.
+    */
+    public Class getColumnClass(int c) {
+        return getValueAt(0, c).getClass();
     }
 
     @Override
@@ -69,14 +87,68 @@ public class ListeningClientsTableModel extends AbstractTableModel {
                 return lc.Port;
             case COL_USERS_NAME:
                 return lc.UsersName;
+            case COL_ENABLE_MPRS:
+                return lc.EnableMPRs;
+            case COL_NUM_MPRS:
+                return lc.NumMPRs;
+            case COL_CHAT:
+                return "";  //!!!
+            //case COL_LISTENING:
+            //    return lc.listeningToggle;
             default:
                 return null;
         }
     }
 
     @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        // Just for the columns that can be changed
+
+        //data[row][col] = value;
+        //fireTableCellUpdated(row, col);
+        ListeningClientInfo lc = listeningClients.get(rowIndex);
+        switch (columnIndex) {
+            case COL_ENABLE_MPRS:
+                lc.EnableMPRs = (Boolean) aValue;
+                fireTableCellUpdated(rowIndex, columnIndex);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
     public String getColumnName(int column) {
         return columnNames.get(column);
+    }
+    
+    public boolean isCellEditable(int row, int col) {
+        switch (col) {
+            case COL_OS_TYPE:
+                return false;
+            case COL_OS_VERSION:
+                return false;
+            case COL_IP_ADDRESS:
+                return false;
+            case COL_HW_MANUFACTURER:
+                return false;
+            case COL_HW_MODEL:
+                return false;
+            case COL_PORT:
+                return false;
+            case COL_USERS_NAME:
+                return false;
+            case COL_ENABLE_MPRS:
+                return true;
+            case COL_NUM_MPRS:
+                return false;
+            case COL_CHAT:
+                return true;
+            //case COL_LISTENING:
+            //    return true;
+            default:
+                return false;
+        }
     }
     
     public void addListeningClient(ListeningClientInfo listeningClientInfo) {
