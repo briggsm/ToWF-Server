@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import static com.briggs_inc.towf_server.PacketConstants.*;
+import java.net.Inet4Address;
 
 /**
  *
@@ -173,5 +174,21 @@ public class ListeningClientsTableModel extends AbstractTableModel {
     
     public void removeAllListeningClients() {
         listeningClients.clear();
+    }
+    
+    public void incrListeningClientNumMPRs(Inet4Address ipAddress, int newMPRs) {
+        int idx = getListeningClientIdxWithIpAddress(ipAddress);
+        if (idx != -1) {
+            listeningClients.get(idx).NumMPRs = listeningClients.get(idx).NumMPRs + newMPRs;
+        }
+    }
+    
+    private int getListeningClientIdxWithIpAddress (Inet4Address ipAddress) {
+        for (int i = 0; i < listeningClients.size(); i++) {
+            if (listeningClients.get(i).IPAddress.equals(ipAddress)) {
+                return i;
+            }
+        }
+        return -1;  // Not found
     }
 }

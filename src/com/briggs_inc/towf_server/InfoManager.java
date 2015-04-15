@@ -24,7 +24,7 @@ import java.util.TimerTask;
 interface InfoManagerListener {
     public void onClientListening(ListeningClientInfo listeningClientInfo);
     public void onClientNotListening(ListeningClientInfo listeningClientInfo);
-    public void onMissingPacketsRequestReceived(int port, List<SeqId> mprList);
+    public void onMissingPacketsRequestReceived(Inet4Address ipAddress, int port, List<SeqId> mprList);
 }
 
 public class InfoManager {
@@ -151,6 +151,7 @@ public class InfoManager {
                 // Add all missing packets to packetsToResend list (all will get sent just before the next 'regular' packet gets sent out)
                 int numMissingPackets = Util.getIntFromByteArray(dgData, MPRPL_NUM_MISSING_PACKETS_START, MPRPL_NUM_MISSING_PACKETS_LENGTH, false);
                 int port = Util.getIntFromByteArray(dgData, MPRPL_PORT_START, MPRPL_PORT_LENGTH, false);
+                Inet4Address ipAddress = (Inet4Address)dg.getAddress();  // get it from the Datagram's header
                 
                 String s = "";
                 List<SeqId> mprList = new ArrayList<SeqId>();
@@ -160,7 +161,7 @@ public class InfoManager {
                 }
                 Log.d(TAG, "Missing Packets request (" + numMissingPackets + ") came in from {" + ((Inet4Address)dg.getAddress()).getHostAddress() + "}: (" + s + ")");
                 
-                notifyListenersOnMissingPacketsRequestReceived(port, mprList);
+                notifyListenersOnMissingPacketsRequestReceived(ipAddress, port, mprList);
                 
                 break;
             default:
@@ -224,9 +225,9 @@ public class InfoManager {
     }
     
     //private void notifyListenersOnMissingPacketsRequestReceived(int port, int[] missingPacketsArr) {
-    private void notifyListenersOnMissingPacketsRequestReceived(int port, List<SeqId> mprList) {
+    private void notifyListenersOnMissingPacketsRequestReceived(Inet4Address ipAddress, int port, List<SeqId> mprList) {
         for (InfoManagerListener listener : listeners) {
-            listener.onMissingPacketsRequestReceived(port, mprList);
+            listener.onMissingPacketsRequestReceived(ipAddress, port, mprList);
         }
     }
 }

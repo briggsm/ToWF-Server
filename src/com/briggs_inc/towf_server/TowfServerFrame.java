@@ -25,6 +25,8 @@ import javax.swing.JOptionPane;
 
 import static com.briggs_inc.towf_server.PacketConstants.*;
 import java.net.InetAddress;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.prefs.Preferences;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
@@ -72,11 +74,15 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     InfoManager infoManager;
     DatagramPacket langPortPairDgPacket;
     ListeningClientsTableModel lcTableModel;
+    Timer refreshLcTableModelTimer = new Timer();
     
+    class RefreshLcTableModelTask extends TimerTask {
+        @Override
+        public void run() {
+            lcTableModel.fireTableDataChanged();
+        }
+    }
     
-    /**
-     * Creates new form MulticastServer
-     */
     public TowfServerFrame() {
         Log.i(TAG, "Note: to change LG_LEVEL, edit 'Log.java'");
         initComponents();
@@ -108,6 +114,8 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         populateInputSourceComboBoxes();
         
         tsThreads = new ArrayList<TowfServerThread>();
+        
+        refreshLcTableModelTimer.schedule(new RefreshLcTableModelTask(), 1000, 1000);
         
         retrievePreferences();
     }
@@ -855,13 +863,16 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     }
 
     @Override
-    public void onMissingPacketsRequestReceived(int port, List<SeqId> mprList) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void onMissingPacketsRequestReceived(Inet4Address ipAddress, int port, List<SeqId> mprList) {
+        // Add to our missing packets list
         for (TowfServerThread tsThread : tsThreads) {
             if (tsThread.getDstPortNumber() == port) {
                 tsThread.handleMissingPacketsRequest(mprList);
             }
         }
+        
+        // Update our table model (table will be refreshed based off of another timer)
+        lcTableModel.incrListeningClientNumMPRs(ipAddress, mprList.size());
     }
 }
 
