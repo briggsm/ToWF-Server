@@ -38,7 +38,7 @@ import javax.swing.table.TableColumn;
  *
  * @author mark
  */
-public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerListener {
+public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerListener, ListeningClientsTableModelListener {
     private static final String TAG = "TowfServerFrame";
     
     public static final String APP_VERSION = "2.0";
@@ -75,7 +75,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     DatagramPacket langPortPairDgPacket;
     ListeningClientsTableModel lcTableModel;
     Timer refreshLcTableModelTimer = new Timer();
-    
+
     class RefreshLcTableModelTask extends TimerTask {
         @Override
         public void run() {
@@ -109,7 +109,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         
         // Setup listeningClientsTable
         lcTableModel = new ListeningClientsTableModel();
-        lcTableModel.setInfoManager(infoManager);
+        lcTableModel.addListener(this);
         listeningClientsTable.setModel(lcTableModel);
         
         lookupAndDisplayNetIFs();
@@ -407,6 +407,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("Chat"));
 
+        chatTA.setEditable(false);
         chatTA.setColumns(20);
         chatTA.setRows(5);
         jScrollPane1.setViewportView(chatTA);
@@ -876,5 +877,25 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         // Update our table model (table will be refreshed based off of another timer)
         lcTableModel.incrListeningClientNumMPRs(ipAddress, mprList.size());
     }
+    
+    @Override
+    public void onChatMsgReceived(Inet4Address ipAddress, String msg) {
+        chatTA.setText(chatTA.getText() + "{" + ipAddress.getHostAddress() + "}: " + msg + "\n");
+        
+        // To-do: Beep
+        
+    }
+    
+    @Override
+    public void onListeningClientEnableMPRsChanged(Inet4Address ipAddress, boolean isEnabled) {
+        infoManager.sendEnableMPRs(ipAddress, isEnabled);
+    }
+
+    @Override
+    public void onListeningClientChatMsgTyped(Inet4Address ipAddress, String msg) {
+        chatTA.setText(chatTA.getText() + "Me to " + ipAddress.getHostAddress() + ": " + msg + "\n");
+        infoManager.sendChatMsg(ipAddress, msg);
+    }
+
 }
 

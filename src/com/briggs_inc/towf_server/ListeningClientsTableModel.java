@@ -13,7 +13,14 @@ import java.net.Inet4Address;
  *
  * @author briggsm
  */
+
+interface ListeningClientsTableModelListener {
+    public void onListeningClientEnableMPRsChanged(Inet4Address ipAddress, boolean isEnabled);
+    public void onListeningClientChatMsgTyped(Inet4Address ipAddress, String msg);
+}
+
 public class ListeningClientsTableModel extends AbstractTableModel {
+    private static final String TAG = "ListeningClientsTableModel";
 
     public static final int COL_OS_TYPE = 0;
     public static final int COL_OS_VERSION = 1;
@@ -42,7 +49,7 @@ public class ListeningClientsTableModel extends AbstractTableModel {
             //"Listening");
     List<ListeningClientInfo> listeningClients = new ArrayList<ListeningClientInfo>();
     
-    InfoManager infoManager;
+    List<ListeningClientsTableModelListener> listeners = new ArrayList<>();
     
     @Override
     public int getRowCount() {
@@ -66,39 +73,44 @@ public class ListeningClientsTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        ListeningClientInfo lc = listeningClients.get(rowIndex);
-        switch (columnIndex) {
-            case COL_OS_TYPE:
-                switch (lc.OsType) {
-                    case OS_IOS:
-                        return "iOS";
-                    case OS_ANDROID:
-                        return "Android";
-                    default:
-                        return "Other";
-                }
-            case COL_OS_VERSION:
-                return lc.OsVersion;
-            case COL_IP_ADDRESS:
-                return lc.IPAddress.getHostAddress();
-            case COL_HW_MANUFACTURER:
-                return lc.HwManufacturer;
-            case COL_HW_MODEL:
-                return lc.HwModel;
-            case COL_PORT:
-                return lc.Port;
-            case COL_USERS_NAME:
-                return lc.UsersName;
-            case COL_ENABLE_MPRS:
-                return lc.EnableMPRs;
-            case COL_NUM_MPRS:
-                return lc.NumMPRs;
-            case COL_CHAT:
-                return "";  //!!!
-            //case COL_LISTENING:
-            //    return lc.listeningToggle;
-            default:
-                return null;
+        if (listeningClients.size() > 0 && rowIndex < listeningClients.size()) {
+            ListeningClientInfo lc = listeningClients.get(rowIndex);
+            switch (columnIndex) {
+                case COL_OS_TYPE:
+                    switch (lc.OsType) {
+                        case OS_IOS:
+                            return "iOS";
+                        case OS_ANDROID:
+                            return "Android";
+                        default:
+                            return "Other";
+                    }
+                case COL_OS_VERSION:
+                    return lc.OsVersion;
+                case COL_IP_ADDRESS:
+                    return lc.IPAddress.getHostAddress();
+                case COL_HW_MANUFACTURER:
+                    return lc.HwManufacturer;
+                case COL_HW_MODEL:
+                    return lc.HwModel;
+                case COL_PORT:
+                    return lc.Port;
+                case COL_USERS_NAME:
+                    return lc.UsersName;
+                case COL_ENABLE_MPRS:
+                    return lc.EnableMPRs;
+                case COL_NUM_MPRS:
+                    return lc.NumMPRs;
+                case COL_CHAT:
+                    return "";  //!!!
+                //case COL_LISTENING:
+                //    return lc.listeningToggle;
+                default:
+                    return null;
+            }
+        } else {
+			Log.e(TAG, "Shouldn't get here. Looks like something is out of range. listeningClients.size: " + listeningClients.size() + ", rowIndex: " + rowIndex);
+            return 777;  // Shouldn't get here. Though if we do, this value shouldn't show up.
         }
     }
 
@@ -113,8 +125,12 @@ public class ListeningClientsTableModel extends AbstractTableModel {
             case COL_ENABLE_MPRS:
                 lc.EnableMPRs = (Boolean) aValue;
                 fireTableCellUpdated(rowIndex, columnIndex);
-                infoManager.sendEnableMPRs(lc.IPAddress, lc.EnableMPRs);
+                notifyListenersOnListeningClientEnableMPRsChanged(lc.IPAddress, lc.EnableMPRs);
                 break;
+            case COL_CHAT:
+                if (((String)aValue).length() > 0) {
+                    notifyListenersOnListeningClientChatMsgTyped(lc.IPAddress, (String)aValue);
+                }
             default:
                 break;
         }
@@ -193,8 +209,20 @@ public class ListeningClientsTableModel extends AbstractTableModel {
         }
         return -1;  // Not found
     }
-
-    void setInfoManager(InfoManager infoManager) {
-        this.infoManager = infoManager;
+    
+    public void addListener(ListeningClientsTableModelListener listener) {
+        listeners.add(listener);
+    }
+    
+    private void notifyListenersOnListeningClientEnableMPRsChanged(Inet4Address ipAddress, boolean isEnabled) {
+        for (ListeningClientsTableModelListener listener : listeners) {
+            listener.onListeningClientEnableMPRsChanged(ipAddress, isEnabled);
+        }
+    }
+    
+    private void notifyListenersOnListeningClientChatMsgTyped(Inet4Address ipAddress, String msg) {
+        for (ListeningClientsTableModelListener listener : listeners) {
+            listener.onListeningClientChatMsgTyped(ipAddress, msg);
+        }
     }
 }

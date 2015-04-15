@@ -33,6 +33,7 @@ public class PacketConstants {
     public static final int DG_DATA_HEADER_PAYLOAD_TYPE_MISSING_PACKETS_REQUEST = 4;
     public static final int DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING = 5;  // When Server resends a missing packet, it uses this type of payload.
     public static final int DG_DATA_HEADER_PAYLOAD_TYPE_ENABLE_MPRS = 6;
+    public static final int DG_DATA_HEADER_PAYLOAD_TYPE_CHAT_MSG = 7;
             
     public static final int BCAFDG_SAMPLE_RATE_START = 6;
     public static final int BCAFDG_SAMPLE_RATE_LENGTH = 4;
@@ -98,4 +99,7 @@ public class PacketConstants {
     // Enable MPRs (Missing Packet Requests)
     public static final int ENMPRS_ENABLED_START = DG_DATA_HEADER_LENGTH + 0;
     public static final int ENMPRS_ENABLED_LENGTH = 1;
+    
+    // Chat Msg
+    public static final int CHATMSG_MSG_START = DG_DATA_HEADER_LENGTH + 0;
 }

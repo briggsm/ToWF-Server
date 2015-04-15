@@ -25,6 +25,7 @@ interface InfoManagerListener {
     public void onClientListening(ListeningClientInfo listeningClientInfo);
     public void onClientNotListening(ListeningClientInfo listeningClientInfo);
     public void onMissingPacketsRequestReceived(Inet4Address ipAddress, int port, List<SeqId> mprList);
+    public void onChatMsgReceived(Inet4Address ipAddress, String msg);
 }
 
 public class InfoManager {
@@ -43,8 +44,8 @@ public class InfoManager {
     Timer langPortPairsInfoSendTimer;
     
     List<InfoManagerListener> listeners = new ArrayList<InfoManagerListener>();
-    
-    
+
+
     public class SendLangPortPairsTask extends TimerTask {
         @Override
         public void run() {
@@ -164,8 +165,13 @@ public class InfoManager {
                 notifyListenersOnMissingPacketsRequestReceived(ipAddress, port, mprList);
                 
                 break;
+            case DG_DATA_HEADER_PAYLOAD_TYPE_CHAT_MSG:
+                String msg = Util.getNullTermStringFromByteArray(dgData, CHATMSG_MSG_START, (dgData.length - CHATMSG_MSG_START));
+                
+                notifyListenersOnChatMsgReceived((Inet4Address)dg.getAddress(), msg);
+                break;
             default:
-                System.out.println("Hmm, payload type UNKNOWN in onInfoDgPkReceived. Type: " + payloadType);
+                Log.e(TAG, "Hmm, payload type UNKNOWN in onInfoDgPkReceived. Type: " + payloadType);
                 return;  // nothing to do
         }
     }
@@ -232,6 +238,26 @@ public class InfoManager {
         }
     }
     
+    void sendChatMsg(Inet4Address ipAddress, String msg) {
+        byte chatMsgArr[] = new byte[DG_DATA_HEADER_LENGTH + msg.length() + 1];  // +1 for the null terminator
+        
+        // "ToWF" Header
+        Util.writeDgDataHeaderToByteArray(chatMsgArr, DG_DATA_HEADER_PAYLOAD_TYPE_CHAT_MSG);
+        
+        // Message
+        Util.putNullTermStringInsideByteArray(msg, chatMsgArr, CHATMSG_MSG_START, msg.length() + 1);  // +1 for the null terminator
+        
+        // Build the Datagram Packet
+        DatagramPacket dgPk = new DatagramPacket(chatMsgArr, chatMsgArr.length, ipAddress, INFO_DST_SOCKET_PORT_NUMBER);
+        
+        // Try to send it out over the network
+        try {
+            infoSocket.send(dgPk);
+        } catch (IOException ex) {
+            Logger.getLogger(InfoManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     private void notifyListenersOnClientListening(ListeningClientInfo listeningClientInfo) {
         for (InfoManagerListener listener : listeners) {
             listener.onClientListening(listeningClientInfo);
@@ -244,10 +270,15 @@ public class InfoManager {
         }
     }
     
-    //private void notifyListenersOnMissingPacketsRequestReceived(int port, int[] missingPacketsArr) {
     private void notifyListenersOnMissingPacketsRequestReceived(Inet4Address ipAddress, int port, List<SeqId> mprList) {
         for (InfoManagerListener listener : listeners) {
             listener.onMissingPacketsRequestReceived(ipAddress, port, mprList);
+        }
+    }
+    
+    private void notifyListenersOnChatMsgReceived(Inet4Address ipAddress, String msg) {
+        for (InfoManagerListener listener : listeners) {
+            listener.onChatMsgReceived(ipAddress, msg);
         }
     }
 }
