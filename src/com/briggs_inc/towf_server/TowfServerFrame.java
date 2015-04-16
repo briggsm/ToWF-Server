@@ -102,10 +102,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         languageTFs.add(language3TF);
         languageTFs.add(language4TF);
         
-        // Info Manager
-        infoManager = new InfoManager();
-        infoManager.addListener(this);
-        infoManager.startReceiving();
+        
         
         // Setup listeningClientsTable
         lcTableModel = new ListeningClientsTableModel();
@@ -524,14 +521,15 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     }//GEN-LAST:event_language4TFActionPerformed
 
     private void removeAllListeningClientsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeAllListeningClientsBtnActionPerformed
-        // Remove From Table
-        lcTableModel.removeAllListeningClients();
-        lcTableModel.fireTableDataChanged();
+        removeAllListeningClients();
         
+        /*
+        // KEEP - in case we need to use UnicastClient support later on.
         // Remove all listening clients from tsThreads
         for (TowfServerThread tsThread : tsThreads) {
             tsThread.removeAllUnicastClients();
         }
+        */
     }//GEN-LAST:event_removeAllListeningClientsBtnActionPerformed
 
     private void language1TFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_language1TFActionPerformed
@@ -670,7 +668,11 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         
         lcTableModel.setLangPortPairsList(langPortPairsList);
         
-        infoManager.startSendingLangPortPairs(langPortPairsList, networkInterfaceIPv4Address.getBroadcast());
+        // Info Manager
+        infoManager = new InfoManager(networkInterfaceIPv4Address, audioFormat, langPortPairsList);
+        infoManager.addListener(this);
+        infoManager.startReceiving();
+        infoManager.startBroadcastingTimedPackets();
         
         // Start a tsThread for each language
         tsThreads.clear();
@@ -694,8 +696,15 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         }
         tsThreads.clear();
         
-        // Cancel the 1/2 second timer
-        infoManager.stopSendingLangPortPairs();
+        // Gracefully destroy infoManager
+        //infoManager.stopSendingLangPortPairs();
+        infoManager.stopBroadcastingTimedPackets();
+        infoManager.stopReceiving();
+        infoManager.removeListener(this);
+        infoManager = null;
+        
+        // Clear Listening Clients Table
+        removeAllListeningClients();
         
         setRunStateGuiText(false);  // "Stopped"
     }
@@ -855,6 +864,12 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
             
             column.setPreferredWidth(Math.max(headerWidth, cellWidth));
         }
+    }
+    
+    private void removeAllListeningClients() {
+        // Remove From Table
+        lcTableModel.removeAllListeningClients();
+        lcTableModel.fireTableDataChanged();
     }
     
     @Override

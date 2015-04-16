@@ -30,8 +30,6 @@ public class TowfServerThread extends Thread implements LineListener {
     
     DatagramPacket bcAudioDatagramPacket;
     
-    DatagramPacket bcPcmAudioFormatDatagramPacket;
-    
     // audio format derived
     int afSampleSizeInBytes = 0;
     int afFrameSize = 0;
@@ -95,8 +93,6 @@ public class TowfServerThread extends Thread implements LineListener {
         this.networkInterfaceAddress = networkInterfaceAddress;
         this.dstSocketPort = dstSocketPort;
         
-        buildPcmAudioFormatDatagramPacket();
-
         // Set Audio Format & Multicast Derived Variables
         setAfMcDerivedVariables();
 
@@ -153,14 +149,6 @@ public class TowfServerThread extends Thread implements LineListener {
                 Log.e(TAG, "[" + language + "]ExNote: bcSock Socket Exception.\nExMessage: " + ex.getMessage());
             }
             Log.d(TAG, "[" + language + "]dgData.length (CONST): " + dgData.length);
-
-            // Send out audioFormatDatagram, so first thing recv'd by client is audio format (then send it out again every 1/2 second after this)
-            try {
-                Log.i(TAG, "[" + language + "]*** Sending Initial Audio Format Datagram ***");
-                bcSock.send(bcPcmAudioFormatDatagramPacket);
-            } catch (IOException ex) {
-                Logger.getLogger(TowfServerThread.class.getName()).log(Level.SEVERE, null, ex);
-            }
         }
     }
 
@@ -176,13 +164,13 @@ public class TowfServerThread extends Thread implements LineListener {
         // === Sanity Checks ===
         // Make sure we've got a line to work with.
         if (line == null) {
-            Log.e(TAG, "[" + language + "]Thread has to Line to work with! Quitting Thread.");
+            Log.e(TAG, "[" + language + "]Thread has no Line to work with! Quitting Thread.");
             return;  // Nothing to do. This thread is done.
         }
         
         // Make sure we've got a socket to work with.
         if (bcSock == null) {
-            Log.e(TAG, "[" + language + "]Thread has to Socket to work with! Quitting Thread.");
+            Log.e(TAG, "[" + language + "]Thread has no Socket to work with! Quitting Thread.");
             return;  // Nothing to do. This thread is done.
         }
         
@@ -196,15 +184,6 @@ public class TowfServerThread extends Thread implements LineListener {
                 // 1/2 second passed
                 hsStartTimeMS = hsEndTimeMS;
 
-                // Send Audio Format Datagram (broadcast)
-                bcPcmAudioFormatDatagramPacket.setAddress(networkInterfaceAddress.getBroadcast());
-                try {
-                    Log.v(TAG, "[" + language + "]*** Sending Update Audio Format Datagram ***");
-                    bcSock.send(bcPcmAudioFormatDatagramPacket);
-                } catch (IOException ex) {
-                    Logger.getLogger(TowfServerThread.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
                 // Send Audio Format Datagram (to each unicast client)
                 // !!! Keep, in case need to add it back in later !!!
                 /*
@@ -375,21 +354,6 @@ public class TowfServerThread extends Thread implements LineListener {
         }
     }
 
-    private void buildPcmAudioFormatDatagramPacket() {
-        byte bcafdgData[] = new byte[UDP_DATA_SIZE];
-        writePcmAudioFormatByteArray(bcafdgData);
-        bcPcmAudioFormatDatagramPacket = new DatagramPacket(bcafdgData, bcafdgData.length, networkInterfaceAddress.getBroadcast(), dstSocketPort);
-    }
-    
-    private void writePcmAudioFormatByteArray(byte[] afb) {
-        Util.writeDgDataHeaderToByteArray(afb, DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_FORMAT);
-        Util.putIntInsideByteArray((int) audioFormat.getSampleRate(), afb, BCAFDG_SAMPLE_RATE_START, BCAFDG_SAMPLE_RATE_LENGTH, false);
-        Util.putIntInsideByteArray(audioFormat.getSampleSizeInBits(), afb, BCAFDG_SAMPLE_SIZE_IN_BITS_START, BCAFDG_SAMPLE_SIZE_IN_BITS_LENGTH, false);
-        Util.putIntInsideByteArray(audioFormat.getChannels(), afb, BCAFDG_CHANNELS_START, BCAFDG_CHANNELS_LENGTH, false);
-        Util.putIntInsideByteArray(audioFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED) ? 1 : 0, afb, BCAFDG_SIGNED_START, BCAFDG_SIGNED_LENGTH, false);
-        Util.putIntInsideByteArray(audioFormat.isBigEndian() ? 1 : 0, afb, BCAFDG_BIG_ENDIAN_START, BCAFDG_BIG_ENDIAN_LENGTH, false);
-    }
-    
     private void setAfMcDerivedVariables() {
         afSampleSizeInBytes = audioFormat.getSampleSizeInBits() / 8;
         if (audioFormat.getSampleSizeInBits() % 8 > 0) {

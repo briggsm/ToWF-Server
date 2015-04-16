@@ -10,11 +10,12 @@ import java.util.logging.Logger;
 import static com.briggs_inc.towf_server.PacketConstants.*;
 import java.io.IOException;
 import java.net.Inet4Address;
-import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import javax.sound.sampled.AudioFormat;
 
 /**
  *
@@ -33,23 +34,31 @@ public class InfoManager {
     
     public static int INFO_PORT_NUMBER = 7769;
     
+    InterfaceAddress networkInterfaceIPv4Address;
+    
     DatagramSocket infoSocket;  // for passing info messages (e.g. sending avail. language/port pairs, receiving "client listening" packet)
     DatagramPacket infoRecvDgPk;
     DatagramPacket infoSendDgPk;
     byte recvDgPkData[] = new byte[UDP_DATA_SIZE];
     byte sendDgPkData[] = new byte[UDP_DATA_SIZE];
     
+    DatagramPacket audioFormatDgPacket;
     DatagramPacket langPortPairsDgPacket;
 
-    Timer langPortPairsInfoSendTimer;
+    AudioFormat audioFormat;
+    List<LangPortPair> langPortPairsList;
+    Timer timedPacketsTimer;
+    
+    boolean isReceiving = false;
     
     List<InfoManagerListener> listeners = new ArrayList<InfoManagerListener>();
 
 
-    public class SendLangPortPairsTask extends TimerTask {
+    public class SendTimedPacketsTask extends TimerTask {
         @Override
         public void run() {
             try {
+                InfoManager.this.infoSocket.send(InfoManager.this.audioFormatDgPacket);
                 InfoManager.this.infoSocket.send(InfoManager.this.langPortPairsDgPacket);
             } catch (IOException ex) {
                 Logger.getLogger(InfoManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -66,9 +75,19 @@ public class InfoManager {
         
         @Override
         public void run() {
-            while (true) {
+            while (InfoManager.this.isReceiving) {
                 try {
                     infoSocket.receive(infoRecvDgPk);  // Hangs (blocks) here until packet is received... (but doesn't use CPU resources while blocking) [But since this should be on a thread of it's own, it's ok]
+                    if (!InfoManager.this.isReceiving) {
+                        return;  // All done.
+                    }
+                } catch (SocketException ex) {
+                    if (ex.getMessage().equalsIgnoreCase("Socket closed")) {
+                        Log.e(TAG, "Socket is closed. Done receiving.");
+                        return;
+                    } else {
+                        Logger.getLogger(InfoManager.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 } catch (IOException ex) {
                     Logger.getLogger(InfoManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -78,9 +97,13 @@ public class InfoManager {
         }
     }
     
-    public InfoManager() {
+    public InfoManager(InterfaceAddress networkInterfaceIPv4Address, AudioFormat af, List<LangPortPair>lppList) {
+        this.networkInterfaceIPv4Address = networkInterfaceIPv4Address;
+        this.audioFormat = af;
+        this.langPortPairsList = lppList;
+        
         try {
-            infoSocket = new DatagramSocket(INFO_PORT_NUMBER);
+            infoSocket = new DatagramSocket(INFO_PORT_NUMBER, networkInterfaceIPv4Address.getAddress());
         } catch (SocketException ex) {
             Logger.getLogger(InfoManager.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -89,15 +112,18 @@ public class InfoManager {
         infoSendDgPk = new DatagramPacket(sendDgPkData, sendDgPkData.length);
     }
     
-    public void addListener(InfoManagerListener listener) {
-        listeners.add(listener);
-    }
-    
     public void startReceiving() {
         Log.d(TAG, "startReceiving");
 
+        isReceiving = true;
+        
         // Better start a new thread, so we don't hang the gui while waiting for packets to be received.
         new Thread(new InfoReceiver()).start();
+    }
+    
+    public void stopReceiving() {
+        isReceiving = false;  // Should cause InfoReceiver thread to quit right after its next packet reception.
+        infoSocket.close();
     }
     
     private void onInfoDgPkReceived(DatagramPacket dg) {
@@ -116,12 +142,10 @@ public class InfoManager {
         int payloadType = Util.getIntFromByteArray(dgData, DG_DATA_HEADER_PAYLOAD_TYPE_START, DG_DATA_HEADER_PAYLOAD_TYPE_LENGTH, false);
         
         switch (payloadType) {
-            case DG_DATA_HEADER_PAYLOAD_TYPE_LANG_PORT_PAIR:
+            //case DG_DATA_HEADER_PAYLOAD_TYPE_LANG_PORT_PAIR:
                 // Seems that we receive here everything that we (as the server) sends out. Not sure why. But will handle it here (do nothing)
-                return;
+                //return;
             case DG_DATA_HEADER_PAYLOAD_TYPE_CLIENT_LISTENING:
-                //System.out.println("onInfoDgPkReceived()-DG_DATA_HEADER_PAYLOAD_TYPE_CLIENT_LISTENING");
-                
                 // === Populate the ListeningClientInfo STRUCT ===
                 ListeningClientInfo cInfo = new ListeningClientInfo();
                 // Received from Client itself
@@ -176,23 +200,37 @@ public class InfoManager {
         }
     }
     
-    public void startSendingLangPortPairs(List<LangPortPair> langPortPairsList, InetAddress broadcastAddress) {
-        // Broadcast the lang/port pairs
+    public void startBroadcastingTimedPackets() {
+        // Audio Format
+        buildAudioFormatDgPk();
         
-        // First, build the datagram packet
-        buildLangPortPairsDgPk(langPortPairsList, broadcastAddress);
+        // LangPortPairs
+        buildLangPortPairsDgPk();
         
-        // Every 2 seconds broadcast the language/port# pairs. Send 1st one now.
-        langPortPairsInfoSendTimer = new Timer();
-        TimerTask sendLangPortPairTask = new SendLangPortPairsTask();
-        langPortPairsInfoSendTimer.schedule(sendLangPortPairTask, 0, 2000);  // Send now, and every 2000ms
+        // Start the Timer
+        timedPacketsTimer = new Timer();
+        timedPacketsTimer.schedule(new SendTimedPacketsTask(), 0, 2000);  // Send now, and every 2000ms
     }
 
-    public void stopSendingLangPortPairs() {
-        langPortPairsInfoSendTimer.cancel();
+    public void stopBroadcastingTimedPackets() {
+        timedPacketsTimer.cancel();
     }
     
-    private void buildLangPortPairsDgPk(List<LangPortPair> langPortPairsList, InetAddress broadcastAddress) {
+    private void buildAudioFormatDgPk() {
+        byte afArr[] = new byte[UDP_DATA_SIZE];
+        
+        Util.writeDgDataHeaderToByteArray(afArr, DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_FORMAT);
+        Util.putIntInsideByteArray((int) audioFormat.getSampleRate(), afArr, AFPL_SAMPLE_RATE_START, AFPL_SAMPLE_RATE_LENGTH, false);
+        Util.putIntInsideByteArray(audioFormat.getSampleSizeInBits(), afArr, AFPL_SAMPLE_SIZE_IN_BITS_START, AFPL_SAMPLE_SIZE_IN_BITS_LENGTH, false);
+        Util.putIntInsideByteArray(audioFormat.getChannels(), afArr, AFPL_CHANNELS_START, AFPL_CHANNELS_LENGTH, false);
+        Util.putIntInsideByteArray(audioFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED) ? 1 : 0, afArr, AFPL_SIGNED_START, AFPL_SIGNED_LENGTH, false);
+        Util.putIntInsideByteArray(audioFormat.isBigEndian() ? 1 : 0, afArr, AFPL_BIG_ENDIAN_START, AFPL_BIG_ENDIAN_LENGTH, false);
+        
+        int dataLength = DG_DATA_HEADER_LENGTH + AFPL_TOAL_PAYLOAD_LENGTH;
+        audioFormatDgPacket = new DatagramPacket(afArr, dataLength, networkInterfaceIPv4Address.getBroadcast(), INFO_PORT_NUMBER);
+    }
+    
+    private void buildLangPortPairsDgPk() {
         // Build langPort pair datagram packet
         byte lppArr[] = new byte[UDP_DATA_SIZE];
         
@@ -214,8 +252,10 @@ public class InfoManager {
             Util.putIntInsideByteArray(langPortPairsList.get(ctr).Port, lppArr, LPP_PORT0_START + (ctr*(LPP_LANG_LENGTH+LPP_PORT_LENGTH)), LPP_PORT_LENGTH, false);
         }
         
+        int dataLength = DG_DATA_HEADER_LENGTH + LPP_NUM_PAIRS_LENGTH + LPP_RSVD0_LENGTH + ((LPP_LANG_LENGTH + LPP_PORT_LENGTH) * langPortPairsList.size());
+        
         // Build the datagram packet
-        langPortPairsDgPacket = new DatagramPacket(lppArr, UDP_DATA_SIZE, broadcastAddress, INFO_DST_SOCKET_PORT_NUMBER);
+        langPortPairsDgPacket = new DatagramPacket(lppArr, dataLength, networkInterfaceIPv4Address.getBroadcast(), INFO_DST_SOCKET_PORT_NUMBER);
     }
     
     public void sendEnableMPRs(Inet4Address ipAddress, boolean enabled) {
@@ -256,6 +296,14 @@ public class InfoManager {
         } catch (IOException ex) {
             Logger.getLogger(InfoManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public void addListener(InfoManagerListener listener) {
+        listeners.add(listener);
+    }
+    
+    public void removeListener(InfoManagerListener listener) {
+        listeners.remove(listener);
     }
     
     private void notifyListenersOnClientListening(ListeningClientInfo listeningClientInfo) {

@@ -35,16 +35,18 @@ public class PacketConstants {
     public static final int DG_DATA_HEADER_PAYLOAD_TYPE_ENABLE_MPRS = 6;
     public static final int DG_DATA_HEADER_PAYLOAD_TYPE_CHAT_MSG = 7;
             
-    public static final int BCAFDG_SAMPLE_RATE_START = 6;
-    public static final int BCAFDG_SAMPLE_RATE_LENGTH = 4;
-    public static final int BCAFDG_SAMPLE_SIZE_IN_BITS_START = 10;
-    public static final int BCAFDG_SAMPLE_SIZE_IN_BITS_LENGTH = 1;
-    public static final int BCAFDG_CHANNELS_START = 11;
-    public static final int BCAFDG_CHANNELS_LENGTH = 1;
-    public static final int BCAFDG_SIGNED_START = 12;
-    public static final int BCAFDG_SIGNED_LENGTH = 1;
-    public static final int BCAFDG_BIG_ENDIAN_START = 13;
-    public static final int BCAFDG_BIG_ENDIAN_LENGTH = 1;
+    // Audio Format Payload Constants
+    public static final int AFPL_SAMPLE_RATE_START = DG_DATA_HEADER_LENGTH + 0;
+    public static final int AFPL_SAMPLE_RATE_LENGTH = 4;
+    public static final int AFPL_SAMPLE_SIZE_IN_BITS_START = DG_DATA_HEADER_LENGTH + 4;
+    public static final int AFPL_SAMPLE_SIZE_IN_BITS_LENGTH = 1;
+    public static final int AFPL_CHANNELS_START = DG_DATA_HEADER_LENGTH + 5;
+    public static final int AFPL_CHANNELS_LENGTH = 1;
+    public static final int AFPL_SIGNED_START = DG_DATA_HEADER_LENGTH + 6;
+    public static final int AFPL_SIGNED_LENGTH = 1;
+    public static final int AFPL_BIG_ENDIAN_START = DG_DATA_HEADER_LENGTH + 7;
+    public static final int AFPL_BIG_ENDIAN_LENGTH = 1;
+    public static final int AFPL_TOAL_PAYLOAD_LENGTH = AFPL_SAMPLE_RATE_LENGTH + AFPL_SAMPLE_SIZE_IN_BITS_LENGTH + AFPL_CHANNELS_LENGTH + AFPL_SIGNED_LENGTH + AFPL_BIG_ENDIAN_LENGTH;
     
     // OS Constants
     public static final int OS_OTHER = 0;
