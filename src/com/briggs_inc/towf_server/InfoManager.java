@@ -176,11 +176,11 @@ public class InfoManager {
         }
     }
     
-    public void startSendingLangPortPairs(List<String> languagesList, InetAddress broadcastAddress) {
+    public void startSendingLangPortPairs(List<LangPortPair> langPortPairsList, InetAddress broadcastAddress) {
         // Broadcast the lang/port pairs
         
         // First, build the datagram packet
-        buildLangPortPairsDgPk(languagesList, broadcastAddress);
+        buildLangPortPairsDgPk(langPortPairsList, broadcastAddress);
         
         // Every 2 seconds broadcast the language/port# pairs. Send 1st one now.
         langPortPairsInfoSendTimer = new Timer();
@@ -192,7 +192,7 @@ public class InfoManager {
         langPortPairsInfoSendTimer.cancel();
     }
     
-    private void buildLangPortPairsDgPk(List<String> languagesList, InetAddress broadcastAddress) {
+    private void buildLangPortPairsDgPk(List<LangPortPair> langPortPairsList, InetAddress broadcastAddress) {
         // Build langPort pair datagram packet
         byte lppArr[] = new byte[UDP_DATA_SIZE];
         
@@ -200,18 +200,18 @@ public class InfoManager {
         Util.writeDgDataHeaderToByteArray(lppArr, DG_DATA_HEADER_PAYLOAD_TYPE_LANG_PORT_PAIR);
 
         // # of Pairs
-        Util.putIntInsideByteArray(languagesList.size(), lppArr, LPP_NUM_PAIRS_START, LPP_NUM_PAIRS_LENGTH, false);
+        Util.putIntInsideByteArray(langPortPairsList.size(), lppArr, LPP_NUM_PAIRS_START, LPP_NUM_PAIRS_LENGTH, false);
         
         // Rsvd bytes
         Util.putIntInsideByteArray(0x00, lppArr, LPP_RSVD0_START, LPP_RSVD0_LENGTH, false);
         
         // Language/Port pairs
-        for (int ctr = 0; ctr < languagesList.size(); ctr++) {
+        for (int ctr = 0; ctr < langPortPairsList.size(); ctr++) {
             // Language
-            Util.putNullTermStringInsideByteArray(languagesList.get(ctr), lppArr, LPP_LANG0_START + (ctr*(LPP_LANG_LENGTH+LPP_PORT_LENGTH)), LPP_LANG_LENGTH);
+            Util.putNullTermStringInsideByteArray(langPortPairsList.get(ctr).Language, lppArr, LPP_LANG0_START + (ctr*(LPP_LANG_LENGTH+LPP_PORT_LENGTH)), LPP_LANG_LENGTH);
             
             // Port
-            Util.putIntInsideByteArray(STARTING_STREAM_PORT_NUMBER + ctr, lppArr, LPP_PORT0_START + (ctr*(LPP_LANG_LENGTH+LPP_PORT_LENGTH)), LPP_PORT_LENGTH, false);
+            Util.putIntInsideByteArray(langPortPairsList.get(ctr).Port, lppArr, LPP_PORT0_START + (ctr*(LPP_LANG_LENGTH+LPP_PORT_LENGTH)), LPP_PORT_LENGTH, false);
         }
         
         // Build the datagram packet

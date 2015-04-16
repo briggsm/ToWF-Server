@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-
 import static com.briggs_inc.towf_server.PacketConstants.*;
 import java.net.Inet4Address;
 
@@ -27,7 +26,7 @@ public class ListeningClientsTableModel extends AbstractTableModel {
     public static final int COL_IP_ADDRESS = 2;
     public static final int COL_HW_MANUFACTURER = 3;
     public static final int COL_HW_MODEL = 4;
-    public static final int COL_PORT = 5;
+    public static final int COL_LANGUAGE = 5;
     public static final int COL_USERS_NAME = 6;
     public static final int COL_ENABLE_MPRS = 7;
     public static final int COL_NUM_MPRS = 8;
@@ -41,15 +40,34 @@ public class ListeningClientsTableModel extends AbstractTableModel {
             "IP Address",
             "HW Manufacturer",
             "HW Model",
-            "Port",
+            "Language",
             "User/Device Name",
             "Enable MPR's",
             "# MPR's",
-            "Chat");
-            //"Listening");
+            "Chat"
+            //"Listening"
+    );
+            
+    
+    public final Object[] longishValues = {
+        "Android",
+        "8.8.8",
+        "255.255.255.255",
+        "Mitsubishi",
+        "Device Model Name",
+        "Romanian",
+        "Michael's iPhone 3GS",
+        true,
+        "999,999",
+        "Hey, how are you doing?"
+    };
+    
     List<ListeningClientInfo> listeningClients = new ArrayList<ListeningClientInfo>();
     
     List<ListeningClientsTableModelListener> listeners = new ArrayList<>();
+    
+    List<LangPortPair> langPortPairsList;
+    
     
     @Override
     public int getRowCount() {
@@ -93,8 +111,13 @@ public class ListeningClientsTableModel extends AbstractTableModel {
                     return lc.HwManufacturer;
                 case COL_HW_MODEL:
                     return lc.HwModel;
-                case COL_PORT:
-                    return lc.Port;
+                case COL_LANGUAGE:
+                    for (int i = 0; i < langPortPairsList.size(); i++) {
+                        if (lc.Port == langPortPairsList.get(i).Port) {
+                            return langPortPairsList.get(i).Language;
+                        }
+                    }
+                    return "???";
                 case COL_USERS_NAME:
                     return lc.UsersName;
                 case COL_ENABLE_MPRS:
@@ -109,8 +132,11 @@ public class ListeningClientsTableModel extends AbstractTableModel {
                     return null;
             }
         } else {
-			Log.e(TAG, "Shouldn't get here. Looks like something is out of range. listeningClients.size: " + listeningClients.size() + ", rowIndex: " + rowIndex);
-            return 777;  // Shouldn't get here. Though if we do, this value shouldn't show up.
+			//Log.e(TAG, "Shouldn't get here. Looks like something is out of range. listeningClients.size: " + listeningClients.size() + ", rowIndex: " + rowIndex);
+            //return 777;  // Shouldn't get here. Though if we do, this value shouldn't show up.
+            
+            // We get here while setting up column sizes. So will just return 0;
+            return 0;
         }
     }
 
@@ -153,7 +179,7 @@ public class ListeningClientsTableModel extends AbstractTableModel {
                 return false;
             case COL_HW_MODEL:
                 return false;
-            case COL_PORT:
+            case COL_LANGUAGE:
                 return false;
             case COL_USERS_NAME:
                 return false;
@@ -208,6 +234,10 @@ public class ListeningClientsTableModel extends AbstractTableModel {
             }
         }
         return -1;  // Not found
+    }
+    
+    public void setLangPortPairsList(List<LangPortPair> list) {
+        langPortPairsList = list;
     }
     
     public void addListener(ListeningClientsTableModelListener listener) {

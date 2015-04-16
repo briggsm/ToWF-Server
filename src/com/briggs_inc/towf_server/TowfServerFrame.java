@@ -22,15 +22,14 @@ import javax.sound.sampled.Mixer;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.JOptionPane;
-
 import static com.briggs_inc.towf_server.PacketConstants.*;
+import java.awt.Component;
 import java.net.InetAddress;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.prefs.Preferences;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 
@@ -75,6 +74,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     DatagramPacket langPortPairDgPacket;
     ListeningClientsTableModel lcTableModel;
     Timer refreshLcTableModelTimer = new Timer();
+    List<LangPortPair> langPortPairsList = new ArrayList<>();
 
     class RefreshLcTableModelTask extends TimerTask {
         @Override
@@ -111,6 +111,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         lcTableModel = new ListeningClientsTableModel();
         lcTableModel.addListener(this);
         listeningClientsTable.setModel(lcTableModel);
+        initTableColumnSizes(listeningClientsTable);
         
         lookupAndDisplayNetIFs();
         populateInputSourceComboBoxes();
@@ -135,28 +136,28 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         runState = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
-        netIFsCB = new javax.swing.JComboBox<NetworkInterface>();
+        netIFsCB = new javax.swing.JComboBox<DescriptiveNetworkInterface>();
         afSampleRate = new javax.swing.JComboBox<String>();
         jPanel2 = new javax.swing.JPanel();
-        jLabel5 = new javax.swing.JLabel();
-        inputSource1CB = new javax.swing.JComboBox<String>();
         jLabel7 = new javax.swing.JLabel();
         language1TF = new javax.swing.JTextField();
+        inputSource1CB = new javax.swing.JComboBox<String>();
+        jLabel5 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
-        jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        inputSource2CB = new javax.swing.JComboBox<String>();
         language2TF = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        inputSource2CB = new javax.swing.JComboBox<String>();
         jPanel3 = new javax.swing.JPanel();
-        jLabel17 = new javax.swing.JLabel();
         jLabel18 = new javax.swing.JLabel();
-        inputSource3CB = new javax.swing.JComboBox<String>();
         language3TF = new javax.swing.JTextField();
+        jLabel17 = new javax.swing.JLabel();
+        inputSource3CB = new javax.swing.JComboBox<String>();
         jPanel4 = new javax.swing.JPanel();
-        jLabel20 = new javax.swing.JLabel();
         jLabel21 = new javax.swing.JLabel();
-        inputSource4CB = new javax.swing.JComboBox<String>();
         language4TF = new javax.swing.JTextField();
+        jLabel20 = new javax.swing.JLabel();
+        inputSource4CB = new javax.swing.JComboBox<String>();
         jPanel5 = new javax.swing.JPanel();
         removeAllListeningClientsBtn = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
@@ -193,18 +194,19 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Input 1"));
 
-        jLabel5.setText("Input Source:");
-
-        inputSource1CB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
+        jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel7.setText("Language:");
 
-        language1TF.setText("English");
         language1TF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 language1TFActionPerformed(evt);
             }
         });
+
+        inputSource1CB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel5.setText("Input Source:");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -213,40 +215,41 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(inputSource1CB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(language1TF)))
+                    .addComponent(language1TF)
+                    .addComponent(inputSource1CB, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(inputSource1CB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(language1TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(language1TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(inputSource1CB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Input 2"));
 
-        jLabel8.setText("Input Source:");
-
+        jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel9.setText("Language:");
-
-        inputSource2CB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         language2TF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 language2TFActionPerformed(evt);
             }
         });
+
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel8.setText("Input Source:");
+
+        inputSource2CB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -255,40 +258,41 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(inputSource2CB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(language2TF)))
+                    .addComponent(language2TF, javax.swing.GroupLayout.DEFAULT_SIZE, 99, Short.MAX_VALUE)
+                    .addComponent(inputSource2CB, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel8)
-                    .addComponent(inputSource2CB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(language2TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(language2TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(inputSource2CB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Input 3"));
 
-        jLabel17.setText("Input Source:");
-
+        jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel18.setText("Language:");
-
-        inputSource3CB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         language3TF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 language3TFActionPerformed(evt);
             }
         });
+
+        jLabel17.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel17.setText("Input Source:");
+
+        inputSource3CB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -297,40 +301,42 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
+                    .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(inputSource3CB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 6, Short.MAX_VALUE))
-                    .addComponent(language3TF)))
+                    .addComponent(language3TF)
+                    .addComponent(inputSource3CB, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel18)
+                    .addComponent(language3TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel17)
                     .addComponent(inputSource3CB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel18)
-                    .addComponent(language3TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Input 4"));
 
-        jLabel20.setText("Input Source:");
-
+        jLabel21.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel21.setText("Language:");
-
-        inputSource4CB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         language4TF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 language4TFActionPerformed(evt);
             }
         });
+
+        jLabel20.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel20.setText("Input Source:");
+
+        inputSource4CB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -339,25 +345,25 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel20, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel21, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addComponent(jLabel21, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel20, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(inputSource4CB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 6, Short.MAX_VALUE))
-                    .addComponent(language4TF)))
+                    .addComponent(language4TF)
+                    .addComponent(inputSource4CB, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel21)
+                    .addComponent(language4TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel20)
                     .addComponent(inputSource4CB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel21)
-                    .addComponent(language4TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Listening Clients"));
@@ -389,7 +395,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 979, Short.MAX_VALUE)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 1094, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(removeAllListeningClientsBtn)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -424,7 +430,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
-                .addComponent(jScrollPane1)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 169, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -436,28 +442,30 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                 .addGap(6, 6, 6)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel11)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(netIFsCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(runState)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnStartStop))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(afSampleRate, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel11)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(netIFsCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(afSampleRate, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 968, Short.MAX_VALUE)
+                        .addComponent(runState)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnStartStop)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -483,7 +491,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 155, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -507,17 +515,9 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         // TODO add your handling code here:
     }//GEN-LAST:event_afSampleRateActionPerformed
 
-    private void language1TFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_language1TFActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_language1TFActionPerformed
-
     private void language2TFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_language2TFActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_language2TFActionPerformed
-
-    private void language3TFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_language3TFActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_language3TFActionPerformed
 
     private void language4TFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_language4TFActionPerformed
         // TODO add your handling code here:
@@ -533,6 +533,14 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
             tsThread.removeAllUnicastClients();
         }
     }//GEN-LAST:event_removeAllListeningClientsBtnActionPerformed
+
+    private void language1TFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_language1TFActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_language1TFActionPerformed
+
+    private void language3TFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_language3TFActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_language3TFActionPerformed
 
     /**
      * @param args the command line arguments
@@ -611,7 +619,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     private javax.swing.JTextField language3TF;
     private javax.swing.JTextField language4TF;
     public javax.swing.JTable listeningClientsTable;
-    private javax.swing.JComboBox<NetworkInterface> netIFsCB;
+    private javax.swing.JComboBox<DescriptiveNetworkInterface> netIFsCB;
     private javax.swing.JButton removeAllListeningClientsBtn;
     private javax.swing.JLabel runState;
     // End of variables declaration//GEN-END:variables
@@ -635,8 +643,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         }
 
         // Get networkInterfaceIPv4Address
-        //String networkInterfaceName = netIFsCB.getSelectedItem().toString();
-        String networkInterfaceName = ((NetworkInterface)netIFsCB.getSelectedItem()).getName();
+        String networkInterfaceName = ((DescriptiveNetworkInterface)netIFsCB.getSelectedItem()).getName();
         try {
             List<InterfaceAddress> networkInterfaceAddresses = NetworkInterface.getByName(networkInterfaceName).getInterfaceAddresses();
             networkInterfaceIPv4Address = getFirstNetworkInterfaceIPv4Address(networkInterfaceAddresses);
@@ -652,27 +659,29 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         
         AudioFormat audioFormat = new AudioFormat(Float.valueOf(afSampleRate.getSelectedItem().toString()), AF_SAMPLE_SIZE_IN_BITS, AF_CHANNELS, AF_SIGNED, AF_BIG_ENDIAN);
         
-        List<String> languagesList = new ArrayList<String>();
+        langPortPairsList.clear();
         List<String> mixerNamesList = new ArrayList<String>();
         for (int ctr = 0; ctr < languageTFs.size(); ctr++) {
             if (!languageTFs.get(ctr).getText().equals("")) {
-                languagesList.add(languageTFs.get(ctr).getText());
+                langPortPairsList.add(new LangPortPair(languageTFs.get(ctr).getText(), STARTING_STREAM_PORT_NUMBER + ctr));
                 mixerNamesList.add(inputSourceCBs.get(ctr).getSelectedItem().toString());
             }
         }
         
-        infoManager.startSendingLangPortPairs(languagesList, networkInterfaceIPv4Address.getBroadcast());
+        lcTableModel.setLangPortPairsList(langPortPairsList);
+        
+        infoManager.startSendingLangPortPairs(langPortPairsList, networkInterfaceIPv4Address.getBroadcast());
         
         // Start a tsThread for each language
         tsThreads.clear();
-        for (int ctr = 0; ctr < languagesList.size(); ctr++) {
+        for (int ctr = 0; ctr < langPortPairsList.size(); ctr++) {
             if (!mixerNamesList.get(ctr).equalsIgnoreCase("<None>")) {
-                TowfServerThread tsThread = new TowfServerThread(this, audioFormat, mixerNamesList.get(ctr), languagesList.get(ctr), networkInterfaceIPv4Address, STARTING_STREAM_PORT_NUMBER + ctr);
+                TowfServerThread tsThread = new TowfServerThread(this, audioFormat, mixerNamesList.get(ctr), langPortPairsList.get(ctr).Language, networkInterfaceIPv4Address, langPortPairsList.get(ctr).Port);
                 tsThread.setStopped(false);
                 tsThread.start();
                 tsThreads.add(tsThread);
             } else {
-                JOptionPane.showMessageDialog(this, "'" + languagesList.get(ctr) + "' does not have a valid Input source!\nSelected input source is: '" + mixerNamesList.get(ctr) + "'", "Invalid Input Source", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "'" + langPortPairsList.get(ctr).Language + "' does not have a valid Input source!\nSelected input source is: '" + mixerNamesList.get(ctr) + "'", "Invalid Input Source", JOptionPane.ERROR_MESSAGE);
             }
         }
 
@@ -693,11 +702,8 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     
     private void retrievePreferences() {
         afSampleRate.setSelectedItem(prefs.get(AF_SAMPLE_RATE_KEY, "22050"));
-        try {
-            netIFsCB.setSelectedItem(NetworkInterface.getByName(prefs.get(NETWORK_INTERFACE_NAME, "")));
-        } catch (SocketException ex) {
-            Logger.getLogger(TowfServerFrame.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        netIFsCB.setSelectedItem(new DescriptiveNetworkInterface(prefs.get(NETWORK_INTERFACE_NAME, "")));
+        
         language1TF.setText(prefs.get(INPUT_LANGUAGE1, ""));
         language2TF.setText(prefs.get(INPUT_LANGUAGE2, ""));
         language3TF.setText(prefs.get(INPUT_LANGUAGE3, ""));
@@ -710,7 +716,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     
     public void savePreferences() {
         prefs.put(AF_SAMPLE_RATE_KEY, afSampleRate.getSelectedItem().toString());
-        prefs.put(NETWORK_INTERFACE_NAME, ((NetworkInterface)netIFsCB.getSelectedItem()).getName());
+        prefs.put(NETWORK_INTERFACE_NAME, ((DescriptiveNetworkInterface)netIFsCB.getSelectedItem()).getName());
         prefs.put(INPUT_LANGUAGE1, language1TF.getText());
         prefs.put(INPUT_LANGUAGE2, language2TF.getText());
         prefs.put(INPUT_LANGUAGE3, language3TF.getText());
@@ -747,32 +753,21 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                 
                 /*
                 // *** Keep for debug ***
-                out.printf("Display name: %s\n", netIf.getDisplayName());
-                out.printf("Name: %s\n", netIf.getName());
+                System.out.printf("Up? %s\n", netIf.isUp());
+                System.out.printf("Loopback? %s\n", netIf.isLoopback());
+                System.out.printf("PointToPoint? %s\n", netIf.isPointToPoint());
+                System.out.printf("Supports multicast? %s\n", netIf.supportsMulticast());
+                System.out.printf("Virtual? %s\n", netIf.isVirtual());
+                System.out.printf("Hardware address: %s\n", Arrays.toString(netIf.getHardwareAddress()));
+                System.out.printf("MTU: %s\n", netIf.getMTU());
+                System.out.printf("Display name: %s\n", netIf.getDisplayName());
+                System.out.printf("Name: %s\n", netIf.getName());
                 Enumeration<InetAddress> inetAddresses = netIf.getInetAddresses();
-
-                for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-                    out.printf("InetAddress: %s\n", inetAddress);
-                    if (inetAddress instanceof Inet4Address) {
-                        out.printf("*IPv4 Address var!\n");
-                        netIfHasIPv4Address = true;
-                    }
-                }
-
-                out.printf("Up? %s\n", netIf.isUp());
-                out.printf("Loopback? %s\n", netIf.isLoopback());
-                out.printf("PointToPoint? %s\n", netIf.isPointToPoint());
-                out.printf("Supports multicast? %s\n", netIf.supportsMulticast());
-                out.printf("Virtual? %s\n", netIf.isVirtual());
-                out.printf("Hardware address: %s\n",
-                            Arrays.toString(netIf.getHardwareAddress()));
-                out.printf("MTU: %s\n", netIf.getMTU());
-
-                out.printf("\n");
+                System.out.printf("\n");
                 */
         
                 if (netIf.isUp() && netIfHasIPv4Address && !netIf.isLoopback()) {
-                    netIFsCB.addItem(netIf);
+                    netIFsCB.addItem(new DescriptiveNetworkInterface(netIf.getName()));
                 }
             }
         } catch (SocketException ex) {
@@ -830,6 +825,36 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         }
         
         return null;
+    }
+    
+    private void initTableColumnSizes(JTable table) {
+        ListeningClientsTableModel model = (ListeningClientsTableModel)table.getModel();
+        TableColumn column = null;
+        Component comp = null;
+        int headerWidth = 0;
+        int cellWidth = 0;
+        Object[] longValues = model.longishValues;
+        TableCellRenderer headerRenderer =
+            table.getTableHeader().getDefaultRenderer();
+
+        for (int i = 0; i < model.getColumnCount(); i++) {
+            column = table.getColumnModel().getColumn(i);
+
+            comp = headerRenderer.getTableCellRendererComponent(
+                                 null, column.getHeaderValue(),
+                                 false, false, 0, 0);
+            headerWidth = comp.getPreferredSize().width;
+
+            comp = table.getDefaultRenderer(model.getColumnClass(i)).
+                             getTableCellRendererComponent(
+                                 table, longValues[i],
+                                 false, false, 0, i);
+            cellWidth = comp.getPreferredSize().width;
+            
+            //System.out.println("Initializing width of column "+ i + ". "+ "headerWidth = " + headerWidth+ "; cellWidth = " + cellWidth);
+            
+            column.setPreferredWidth(Math.max(headerWidth, cellWidth));
+        }
     }
     
     @Override
