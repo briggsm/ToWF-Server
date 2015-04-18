@@ -921,7 +921,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     @Override
     public void onChatMsgReceived(Inet4Address ipAddress, String msg) {
         chatTA.setText(chatTA.getText() + "{" + ipAddress.getHostAddress() + "}: " + msg + "\n");
-        
+        chatTA.setCaretPosition(chatTA.getDocument().getLength());
         // To-do: Beep
         
     }
@@ -934,6 +934,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     @Override
     public void onListeningClientChatMsgTyped(Inet4Address ipAddress, String msg) {
         chatTA.setText(chatTA.getText() + "Me to " + ipAddress.getHostAddress() + ": " + msg + "\n");
+        chatTA.setCaretPosition(chatTA.getDocument().getLength());
         infoManager.sendChatMsg(ipAddress, msg);
     }
 
