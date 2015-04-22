@@ -1,14 +1,20 @@
 package com.briggs_inc.towf_server;
 
+import static java.lang.Math.abs;
+
 /**
  *
  * @author briggsm
  */
-public class SeqId implements Comparable<SeqId>{
+public class SeqId implements Comparable<SeqId> {
     public int intValue;
     
     public SeqId(int i) {
-        intValue = i & 0xFFFF;
+        if (i < 0) {
+            this.intValue = 0xFFFF - (abs(i) & 0xFFFF) + 1;
+        } else {
+            this.intValue = i & 0xFFFF;
+        }
     }
 
     
@@ -31,7 +37,8 @@ public class SeqId implements Comparable<SeqId>{
     public int compareTo(SeqId otherSeqId) {
         if (this.isLessThanSeqId(otherSeqId)) {
             return 0 - Math.abs(this.numSeqIdsExclusivelyBetweenMeAndSeqId(otherSeqId));
-        } else if (this.isGreaterThanSeqId(otherSeqId)) {
+        //} else if (this.isGreaterThanSeqId(otherSeqId)) {
+        } else if (this.isEqualToSeqId(otherSeqId)) {
             return 0;
         } else {
             return Math.abs(this.numSeqIdsExclusivelyBetweenMeAndSeqId(otherSeqId));
