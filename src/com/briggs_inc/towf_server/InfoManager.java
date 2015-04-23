@@ -181,7 +181,7 @@ public class InfoManager {
                     mprList.add(new SeqId(Util.getIntFromByteArray(dgData, MPRPL_PACKET0_SEQID_START + (i*2), MPRPL_PACKET0_SEQID_LENGTH, false)));
                     s += String.format("0x%04x, ", mprList.get(i).intValue);
                 }
-                Log.d(TAG, "Missing Packets request (" + numMissingPackets + ") came in from {" + ((Inet4Address)dg.getAddress()).getHostAddress() + "}: (" + s + ")");
+                Log.d(TAG, "Missing Packets request (" + numMissingPackets + ") came in from {" + ((Inet4Address)dg.getAddress()).getHostAddress() + "} on Port [" + port + "]: (" + s + ")");
                 
                 notifyListenersOnMissingPacketsRequestReceived(ipAddress, port, mprList);
                 
