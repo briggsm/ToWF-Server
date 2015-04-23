@@ -142,9 +142,6 @@ public class InfoManager {
         int payloadType = Util.getIntFromByteArray(dgData, DG_DATA_HEADER_PAYLOAD_TYPE_START, DG_DATA_HEADER_PAYLOAD_TYPE_LENGTH, false);
         
         switch (payloadType) {
-            //case DG_DATA_HEADER_PAYLOAD_TYPE_LANG_PORT_PAIR:
-                // Seems that we receive here everything that we (as the server) sends out. Not sure why. But will handle it here (do nothing)
-                //return;
             case DG_DATA_HEADER_PAYLOAD_TYPE_CLIENT_LISTENING:
                 // === Populate the ListeningClientInfo STRUCT ===
                 ListeningClientInfo cInfo = new ListeningClientInfo();
@@ -221,10 +218,6 @@ public class InfoManager {
         
         Util.writeDgDataHeaderToByteArray(afArr, DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_FORMAT);
         Util.putIntInsideByteArray((int) audioFormat.getSampleRate(), afArr, AFPL_SAMPLE_RATE_START, AFPL_SAMPLE_RATE_LENGTH, false);
-        Util.putIntInsideByteArray(audioFormat.getSampleSizeInBits(), afArr, AFPL_SAMPLE_SIZE_IN_BITS_START, AFPL_SAMPLE_SIZE_IN_BITS_LENGTH, false);
-        Util.putIntInsideByteArray(audioFormat.getChannels(), afArr, AFPL_CHANNELS_START, AFPL_CHANNELS_LENGTH, false);
-        Util.putIntInsideByteArray(audioFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED) ? 1 : 0, afArr, AFPL_SIGNED_START, AFPL_SIGNED_LENGTH, false);
-        Util.putIntInsideByteArray(audioFormat.isBigEndian() ? 1 : 0, afArr, AFPL_BIG_ENDIAN_START, AFPL_BIG_ENDIAN_LENGTH, false);
         
         int dataLength = DG_DATA_HEADER_LENGTH + AFPL_TOAL_PAYLOAD_LENGTH;
         audioFormatDgPacket = new DatagramPacket(afArr, dataLength, networkInterfaceIPv4Address.getBroadcast(), INFO_PORT_NUMBER);

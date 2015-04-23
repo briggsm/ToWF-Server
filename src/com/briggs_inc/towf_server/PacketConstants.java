@@ -38,15 +38,7 @@ public class PacketConstants {
     // Audio Format Payload Constants
     public static final int AFPL_SAMPLE_RATE_START = DG_DATA_HEADER_LENGTH + 0;
     public static final int AFPL_SAMPLE_RATE_LENGTH = 4;
-    public static final int AFPL_SAMPLE_SIZE_IN_BITS_START = DG_DATA_HEADER_LENGTH + 4;
-    public static final int AFPL_SAMPLE_SIZE_IN_BITS_LENGTH = 1;
-    public static final int AFPL_CHANNELS_START = DG_DATA_HEADER_LENGTH + 5;
-    public static final int AFPL_CHANNELS_LENGTH = 1;
-    public static final int AFPL_SIGNED_START = DG_DATA_HEADER_LENGTH + 6;
-    public static final int AFPL_SIGNED_LENGTH = 1;
-    public static final int AFPL_BIG_ENDIAN_START = DG_DATA_HEADER_LENGTH + 7;
-    public static final int AFPL_BIG_ENDIAN_LENGTH = 1;
-    public static final int AFPL_TOAL_PAYLOAD_LENGTH = AFPL_SAMPLE_RATE_LENGTH + AFPL_SAMPLE_SIZE_IN_BITS_LENGTH + AFPL_CHANNELS_LENGTH + AFPL_SIGNED_LENGTH + AFPL_BIG_ENDIAN_LENGTH;
+    public static final int AFPL_TOAL_PAYLOAD_LENGTH = AFPL_SAMPLE_RATE_LENGTH;
     
     // OS Constants
     public static final int OS_OTHER = 0;
