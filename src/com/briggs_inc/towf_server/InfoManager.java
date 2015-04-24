@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InterfaceAddress;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -159,6 +160,7 @@ public class InfoManager {
                 cInfo.EnableMPRs = new Boolean(true);
                 cInfo.NumMPRs = 0;
                 //cInfo.listeningToggle = new Boolean(false);
+                cInfo.Time = new Date();  // defaults to "now"
                 
                 if (cInfo.IsListening) {
                     notifyListenersOnClientListening(cInfo);

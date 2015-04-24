@@ -1,6 +1,7 @@
 package com.briggs_inc.towf_server;
 
 import java.net.Inet4Address;
+import java.util.Date;
 
 /**
  *
@@ -23,6 +24,7 @@ public class ListeningClientInfo {
     public Boolean EnableMPRs;
     public int NumMPRs;
     //public Boolean listeningToggle;
+    public Date Time;
 
     @Override
     public boolean equals(Object obj) {

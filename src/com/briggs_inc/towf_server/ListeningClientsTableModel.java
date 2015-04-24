@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import static com.briggs_inc.towf_server.PacketConstants.*;
 import java.net.Inet4Address;
+import java.text.SimpleDateFormat;
 
 /**
  *
@@ -32,11 +33,12 @@ public class ListeningClientsTableModel extends AbstractTableModel {
     public static final int COL_NUM_MPRS = 8;
     public static final int COL_CHAT = 9;
     //public static final int COL_LISTENING = 10;
+    public static final int COL_TIME = 10;
             
     // Column Names - NOTE: Make sure this order matches with the COL Constants above!
     List<String> columnNames = Arrays.asList(
             "OS Type",
-            "OS Version",
+            "OS Ver",
             "IP Address",
             "HW Manufacturer",
             "HW Model",
@@ -44,8 +46,9 @@ public class ListeningClientsTableModel extends AbstractTableModel {
             "User/Device Name",
             "Enable MPR's",
             "# MPR's",
-            "Chat"
+            "Chat",
             //"Listening"
+            "Time"
     );
             
     
@@ -59,7 +62,8 @@ public class ListeningClientsTableModel extends AbstractTableModel {
         "Michael's iPhone 3GS",
         true,
         "999,999",
-        "Hey, how are you doing?"
+        "Hey, how are you?",
+        "23:59:00"
     };
     
     List<ListeningClientInfo> listeningClients = new ArrayList<ListeningClientInfo>();
@@ -128,6 +132,8 @@ public class ListeningClientsTableModel extends AbstractTableModel {
                     return "";  //!!!
                 //case COL_LISTENING:
                 //    return lc.listeningToggle;
+                case COL_TIME:
+                    return new SimpleDateFormat("HH:mm:ss").format(lc.Time);
                 default:
                     return null;
             }
@@ -191,6 +197,8 @@ public class ListeningClientsTableModel extends AbstractTableModel {
                 return true;
             //case COL_LISTENING:
             //    return true;
+            case COL_TIME:
+                return false;
             default:
                 return false;
         }
