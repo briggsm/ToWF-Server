@@ -14,7 +14,6 @@ public class PacketConstants {
     public static final int UDP_DATA_SIZE = UDP_PACKET_SIZE - UDP_HEADER_SIZE - IPV4_HEADER_SIZE - ETH_HEADER_SIZE; //512-42=470
     public static final int UDP_PAYLOAD_SIZE = UDP_DATA_SIZE - DG_DATA_HEADER_LENGTH;  // 470-6=464
     
-    public static final int INFO_DST_SOCKET_PORT_NUMBER = 7769;
     public static final int STARTING_STREAM_PORT_NUMBER = 7770;
     
     public static final int ToWF_AS_INT = 0x546F5746;  // "ToWF"
@@ -34,6 +33,7 @@ public class PacketConstants {
     public static final int DG_DATA_HEADER_PAYLOAD_TYPE_PCM_AUDIO_DATA_MISSING = 5;  // When Server resends a missing packet, it uses this type of payload.
     public static final int DG_DATA_HEADER_PAYLOAD_TYPE_ENABLE_MPRS = 6;
     public static final int DG_DATA_HEADER_PAYLOAD_TYPE_CHAT_MSG = 7;
+    public static final int DG_DATA_HEADER_PAYLOAD_TYPE_RLS = 8;
             
     // Audio Format Payload Constants
     public static final int AFPL_SAMPLE_RATE_START = DG_DATA_HEADER_LENGTH + 0;

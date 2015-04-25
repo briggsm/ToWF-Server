@@ -159,6 +159,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         removeAllListeningClientsBtn = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
         listeningClientsTable = new javax.swing.JTable();
+        requestListeningStatesBtn = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         chatTA = new javax.swing.JTextArea();
@@ -385,6 +386,13 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         ));
         jScrollPane5.setViewportView(listeningClientsTable);
 
+        requestListeningStatesBtn.setText("Request Listening States");
+        requestListeningStatesBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                requestListeningStatesBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -395,6 +403,8 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                     .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 1094, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(removeAllListeningClientsBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(requestListeningStatesBtn)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -402,7 +412,9 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(removeAllListeningClientsBtn)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(removeAllListeningClientsBtn)
+                    .addComponent(requestListeningStatesBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE)
                 .addContainerGap())
@@ -540,6 +552,12 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         // TODO add your handling code here:
     }//GEN-LAST:event_language3TFActionPerformed
 
+    private void requestListeningStatesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_requestListeningStatesBtnActionPerformed
+        if (infoManager != null) {  // Only makes sense when Server is Started (and hence infoManager exists)
+            infoManager.broadcastRLSPacket(); // Request Listening State packet to everybody.
+        }
+    }//GEN-LAST:event_requestListeningStatesBtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -619,6 +637,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     public javax.swing.JTable listeningClientsTable;
     private javax.swing.JComboBox<DescriptiveNetworkInterface> netIFsCB;
     private javax.swing.JButton removeAllListeningClientsBtn;
+    private javax.swing.JButton requestListeningStatesBtn;
     private javax.swing.JLabel runState;
     // End of variables declaration//GEN-END:variables
 

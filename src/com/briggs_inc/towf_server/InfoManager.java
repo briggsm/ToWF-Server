@@ -54,7 +54,6 @@ public class InfoManager {
     
     List<InfoManagerListener> listeners = new ArrayList<InfoManagerListener>();
 
-
     public class SendTimedPacketsTask extends TimerTask {
         @Override
         public void run() {
@@ -248,7 +247,7 @@ public class InfoManager {
         }
         
         int dataLength = DG_DATA_HEADER_LENGTH + LPP_NUM_PAIRS_LENGTH + LPP_RSVD0_LENGTH + ((LPP_LANG_LENGTH + LPP_PORT_LENGTH) * langPortPairsList.size());
-        langPortPairsDgPacket = new DatagramPacket(lppArr, dataLength, networkInterfaceIPv4Address.getBroadcast(), INFO_DST_SOCKET_PORT_NUMBER);
+        langPortPairsDgPacket = new DatagramPacket(lppArr, dataLength, networkInterfaceIPv4Address.getBroadcast(), INFO_PORT_NUMBER);
     }
     
     public void sendEnableMPRs(Inet4Address ipAddress, boolean enabled) {
@@ -261,7 +260,7 @@ public class InfoManager {
         Util.putIntInsideByteArray(enabled ? 1 : 0, enMPRsArr, ENMPRS_ENABLED_START, ENMPRS_ENABLED_LENGTH, false);
         
         int dataLength = DG_DATA_HEADER_LENGTH + 1;
-        DatagramPacket dgPk = new DatagramPacket(enMPRsArr, dataLength, ipAddress, INFO_DST_SOCKET_PORT_NUMBER);
+        DatagramPacket dgPk = new DatagramPacket(enMPRsArr, dataLength, ipAddress, INFO_PORT_NUMBER);
         
         // Try to send it out over the network
         try {
@@ -281,7 +280,26 @@ public class InfoManager {
         Util.putNullTermStringInsideByteArray(msg, chatMsgArr, CHATMSG_MSG_START, msg.length() + 1);  // +1 for the null terminator
         
         int dataLength = DG_DATA_HEADER_LENGTH + msg.length() + 1;  // +1 for the null terminator
-        DatagramPacket dgPk = new DatagramPacket(chatMsgArr, dataLength, ipAddress, INFO_DST_SOCKET_PORT_NUMBER);
+        DatagramPacket dgPk = new DatagramPacket(chatMsgArr, dataLength, ipAddress, INFO_PORT_NUMBER);
+        
+        // Try to send it out over the network
+        try {
+            infoSocket.send(dgPk);
+        } catch (IOException ex) {
+            Logger.getLogger(InfoManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    void broadcastRLSPacket() {
+        byte rlsArr[] = new byte[UDP_DATA_SIZE];
+        
+        // "ToWF" Header
+        Util.writeDgDataHeaderToByteArray(rlsArr, DG_DATA_HEADER_PAYLOAD_TYPE_RLS);
+        
+        // NO PAYLOAD at this point
+        
+        int dataLength = DG_DATA_HEADER_LENGTH + 0;  // No payload
+        DatagramPacket dgPk = new DatagramPacket(rlsArr, dataLength, networkInterfaceIPv4Address.getBroadcast(), INFO_PORT_NUMBER);
         
         // Try to send it out over the network
         try {
