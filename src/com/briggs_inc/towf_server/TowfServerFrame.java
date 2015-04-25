@@ -118,6 +118,10 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         refreshLcTableModelTimer.schedule(new RefreshLcTableModelTask(), 1000, 1000);
         
         retrievePreferences();
+        
+        // Initially hide the waitAfterStop labels
+        waitAfterStopLbl.setVisible(false);
+        waitAfterStopCountdownLbl.setVisible(false);
     }
 
     /**
@@ -163,6 +167,8 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         jPanel6 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         chatTA = new javax.swing.JTextArea();
+        waitAfterStopLbl = new javax.swing.JLabel();
+        waitAfterStopCountdownLbl = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ToWF Server (v" + APP_VERSION + ")");
@@ -443,6 +449,10 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                 .addContainerGap())
         );
 
+        waitAfterStopLbl.setText("Please wait for a bit to let all Clients completely disconnect: ");
+
+        waitAfterStopCountdownLbl.setText("10");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -462,19 +472,22 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                             .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel11)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(netIFsCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(afSampleRate, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 968, Short.MAX_VALUE)
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(netIFsCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 990, Short.MAX_VALUE)
                         .addComponent(runState)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnStartStop)))
+                        .addComponent(btnStartStop))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(afSampleRate, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(waitAfterStopLbl)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(waitAfterStopCountdownLbl)
+                        .addGap(10, 10, 10)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -487,9 +500,13 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                     .addComponent(btnStartStop)
                     .addComponent(runState))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(afSampleRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel6)
+                        .addComponent(afSampleRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(waitAfterStopLbl)
+                        .addComponent(waitAfterStopCountdownLbl)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(1, 1, 1)
@@ -516,6 +533,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         if (btnStartStop.getText().equals("Start")) {
             startThreads();
         } else {
+            displayWaitAfterStopMsg();
             stopThreads();
         }
     }//GEN-LAST:event_btnStartStopActionPerformed
@@ -639,6 +657,8 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     private javax.swing.JButton removeAllListeningClientsBtn;
     private javax.swing.JButton requestListeningStatesBtn;
     private javax.swing.JLabel runState;
+    private javax.swing.JLabel waitAfterStopCountdownLbl;
+    private javax.swing.JLabel waitAfterStopLbl;
     // End of variables declaration//GEN-END:variables
 
     private void startThreads() {
@@ -957,5 +977,31 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         infoManager.sendChatMsg(ipAddress, msg);
     }
 
+    private void displayWaitAfterStopMsg() {
+        waitAfterStopLbl.setVisible(true);
+        waitAfterStopCountdownLbl.setVisible(true);
+        btnStartStop.setEnabled(false);  // Disable Start/Stop Button
+        // Set timer to turn off after "countdown's initial" seconds
+        Timer waitAfterStopTimer = new Timer();
+        waitAfterStopTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                int secsLeft = Integer.valueOf(waitAfterStopCountdownLbl.getText());
+                secsLeft--;
+                waitAfterStopCountdownLbl.setText(String.valueOf(secsLeft));
+                if (secsLeft == 0) {
+                    cancel();
+                    hideWaitAfterStopMsg();
+                    waitAfterStopCountdownLbl.setText("10");
+                    btnStartStop.setEnabled(true);  // ReEnable Start/Stop Button
+                }
+            }
+        }, 1000, 1000);
+    }
+    
+    private void hideWaitAfterStopMsg() {
+        waitAfterStopLbl.setVisible(false);
+        waitAfterStopCountdownLbl.setVisible(false);
+    }
 }
 
