@@ -24,10 +24,15 @@ import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 import static com.briggs_inc.towf_server.PacketConstants.*;
 import java.awt.Component;
+import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.prefs.Preferences;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -961,8 +966,9 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     public void onChatMsgReceived(Inet4Address ipAddress, String msg) {
         chatTA.setText(chatTA.getText() + "{" + ipAddress.getHostAddress() + "}: " + msg + "\n");
         chatTA.setCaretPosition(chatTA.getDocument().getLength());
-        // To-do: Beep
         
+        // Beep
+        playDripSound();
     }
     
     @Override
@@ -975,6 +981,9 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         chatTA.setText(chatTA.getText() + "Me to " + ipAddress.getHostAddress() + ": " + msg + "\n");
         chatTA.setCaretPosition(chatTA.getDocument().getLength());
         infoManager.sendChatMsg(ipAddress, msg);
+        
+		// Beep
+        playDripSound();
     }
 
     private void displayWaitAfterStopMsg() {
@@ -1002,6 +1011,17 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     private void hideWaitAfterStopMsg() {
         waitAfterStopLbl.setVisible(false);
         waitAfterStopCountdownLbl.setVisible(false);
+    }
+    
+    public void playDripSound() {
+        try {
+            Clip clip = AudioSystem.getClip();
+            AudioInputStream inputStream = AudioSystem.getAudioInputStream(TowfServerFrame.class.getResourceAsStream("drip.wav"));
+            clip.open(inputStream);
+            clip.start();
+        } catch (LineUnavailableException | UnsupportedAudioFileException | IOException e) {
+            System.err.println(e.getMessage());
+        }
     }
 }
 
