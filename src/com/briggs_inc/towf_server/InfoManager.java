@@ -132,6 +132,16 @@ public class InfoManager {
         byte dgData[] = new byte[UDP_DATA_SIZE];
         dgData = dg.getData();
         
+        // If it's from myself, ignore it
+        // ^---- Note: on Windows (or maybe it's dependant on NIC's), the Server gets back the broadcasted packets that it sends. These will get caught here.
+        Inet4Address dgIpAddress = (Inet4Address)dg.getAddress();  // get it from the Datagram's header
+        //Log.d(TAG, "packet's ipAddress: " + ipAddress2);
+        //Log.d(TAG, "my networkInterfaceIPv4Address: " + networkInterfaceIPv4Address);
+        if (dgIpAddress.equals((Inet4Address)networkInterfaceIPv4Address.getAddress())) {
+            //Log.d(TAG, "HEY, I sent this packet. Ignoring it.");
+            return;
+        }
+        
         // Check for "ToWF" in Header
         int headerId = Util.getIntFromByteArray(dgData, DG_DATA_HEADER_ID_START, DG_DATA_HEADER_ID_LENGTH, true); 
         if (headerId != ToWF_AS_INT) {
