@@ -244,7 +244,7 @@ public class TowfServerThread extends Thread implements LineListener {
         // Note: this will be running from a different thread (the timer thread), so be careful (though, the timer thread [timer task] will only call this function 1 at a time, sequentially).
         // First, send Missing Packets (if any)
         if (syncMissingPacketsSeqIdsContainer.getSize() > 0) {
-            Log.d(TAG, "[" + language + "]<TimerThread>(" + syncMissingPacketsSeqIdsContainer.getSize() + ") MISSING PACKETS we've heard about: {" + syncMissingPacketsSeqIdsContainer.getAllSeqIdsAsHexString() + "} (though, as we start sending them more MAY be added to missingPacketsList). Resending them now.");
+            Log.v(TAG, "[" + language + "]<TimerThread>(" + syncMissingPacketsSeqIdsContainer.getSize() + ") MISSING PACKETS we've heard about: {" + syncMissingPacketsSeqIdsContainer.getAllSeqIdsAsHexString() + "} (though, as we start sending them more MAY be added to missingPacketsList). Resending them now.");
             SeqId mpSeqId;
             while ((mpSeqId = syncMissingPacketsSeqIdsContainer.popFirstSeqId()) != null) {
                 Log.v(TAG, String.format("  [" + language + "]<TimerThread>mpSeqId: 0x%04x", mpSeqId.intValue));
