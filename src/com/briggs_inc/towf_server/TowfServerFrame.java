@@ -45,7 +45,7 @@ import javax.swing.table.TableColumn;
 public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerListener, ListeningClientsTableModelListener {
     private static final String TAG = "TowfServerFrame";
     
-    public static final String APP_VERSION = "2.0";
+    public static final String APP_VERSION = "3.0";
     
     private Preferences prefs;
     
@@ -1003,6 +1003,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                     hideWaitAfterStopMsg();
                     waitAfterStopCountdownLbl.setText("10");
                     btnStartStop.setEnabled(true);  // ReEnable Start/Stop Button
+                    btnStartStop.requestFocusInWindow();
                 }
             }
         }, 1000, 1000);

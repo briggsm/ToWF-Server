@@ -59,9 +59,11 @@ public class PacketConstants {
     public static final int LPP_NUM_PAIRS_LENGTH = 1;
     public static final int LPP_RSVD0_START = DG_DATA_HEADER_LENGTH + 1;
     public static final int LPP_RSVD0_LENGTH = 1;
-    public static final int LPP_LANG0_START = DG_DATA_HEADER_LENGTH + 2;
+    public static final int LPP_SERVER_VERSION_START = DG_DATA_HEADER_LENGTH + 2;
+    public static final int LPP_SERVER_VERSION_LENGTH = 10;
+    public static final int LPP_LANG0_START = DG_DATA_HEADER_LENGTH + 12;
     public static final int LPP_LANG_LENGTH = 16;
-    public static final int LPP_PORT0_START = DG_DATA_HEADER_LENGTH + 18;
+    public static final int LPP_PORT0_START = DG_DATA_HEADER_LENGTH + 28;
     public static final int LPP_PORT_LENGTH = 2;
     
     // Client Listening Payload

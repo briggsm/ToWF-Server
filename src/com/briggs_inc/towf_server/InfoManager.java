@@ -247,6 +247,10 @@ public class InfoManager {
         // Rsvd bytes
         Util.putIntInsideByteArray(0x00, lppArr, LPP_RSVD0_START, LPP_RSVD0_LENGTH, false);
         
+        // Server Version
+        Log.d(TAG, "APP_VERSION: " + TowfServerFrame.APP_VERSION);
+        Util.putNullTermStringInsideByteArray(TowfServerFrame.APP_VERSION, lppArr, LPP_SERVER_VERSION_START, LPP_SERVER_VERSION_LENGTH);
+        
         // Language/Port pairs
         for (int ctr = 0; ctr < langPortPairsList.size(); ctr++) {
             // Language
@@ -256,7 +260,7 @@ public class InfoManager {
             Util.putIntInsideByteArray(langPortPairsList.get(ctr).Port, lppArr, LPP_PORT0_START + (ctr*(LPP_LANG_LENGTH+LPP_PORT_LENGTH)), LPP_PORT_LENGTH, false);
         }
         
-        int dataLength = DG_DATA_HEADER_LENGTH + LPP_NUM_PAIRS_LENGTH + LPP_RSVD0_LENGTH + ((LPP_LANG_LENGTH + LPP_PORT_LENGTH) * langPortPairsList.size());
+        int dataLength = DG_DATA_HEADER_LENGTH + LPP_NUM_PAIRS_LENGTH + LPP_RSVD0_LENGTH + LPP_SERVER_VERSION_LENGTH + ((LPP_LANG_LENGTH + LPP_PORT_LENGTH) * langPortPairsList.size());
         langPortPairsDgPacket = new DatagramPacket(lppArr, dataLength, networkInterfaceIPv4Address.getBroadcast(), INFO_PORT_NUMBER);
     }
     
