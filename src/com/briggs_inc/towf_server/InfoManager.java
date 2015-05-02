@@ -97,16 +97,12 @@ public class InfoManager {
         }
     }
     
-    public InfoManager(InterfaceAddress networkInterfaceIPv4Address, AudioFormat af, List<LangPortPair>lppList) {
+    public InfoManager(InterfaceAddress networkInterfaceIPv4Address, AudioFormat af, List<LangPortPair>lppList) throws SocketException {
         this.networkInterfaceIPv4Address = networkInterfaceIPv4Address;
         this.audioFormat = af;
         this.langPortPairsList = lppList;
         
-        try {
-            infoSocket = new DatagramSocket(INFO_PORT_NUMBER, networkInterfaceIPv4Address.getAddress());
-        } catch (SocketException ex) {
-            Logger.getLogger(InfoManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        infoSocket = new DatagramSocket(INFO_PORT_NUMBER, networkInterfaceIPv4Address.getAddress());
         
         infoRecvDgPk = new DatagramPacket(recvDgPkData, recvDgPkData.length);
         infoSendDgPk = new DatagramPacket(sendDgPkData, sendDgPkData.length);
@@ -123,7 +119,9 @@ public class InfoManager {
     
     public void stopReceiving() {
         isReceiving = false;  // Should cause InfoReceiver thread to quit right after its next packet reception.
-        infoSocket.close();
+        if (infoSocket != null) {
+            infoSocket.close();
+        }
     }
     
     private void onInfoDgPkReceived(DatagramPacket dg) {

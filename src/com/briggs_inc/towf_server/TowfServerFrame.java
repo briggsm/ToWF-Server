@@ -711,9 +711,19 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         }
         
         lcTableModel.setLangPortPairsList(langPortPairsList);
-        
+
         // Info Manager
-        infoManager = new InfoManager(networkInterfaceIPv4Address, audioFormat, langPortPairsList);
+        try {
+            infoManager = new InfoManager(networkInterfaceIPv4Address, audioFormat, langPortPairsList);
+        } catch (SocketException ex) {
+            Logger.getLogger(TowfServerFrame.class.getName()).log(Level.SEVERE, null, ex);
+            String extraStr = "";
+            if (ex.getMessage().equalsIgnoreCase("Address already in use")) {
+                extraStr = "\nAddress: " + networkInterfaceIPv4Address.getAddress().toString() + ":" + InfoManager.INFO_PORT_NUMBER;
+            }
+            JOptionPane.showMessageDialog(this, ex.getMessage() + extraStr, "Socket Exception", JOptionPane.ERROR_MESSAGE);
+            return;  // We shouldn't continue if we get an exception here.
+        }
         infoManager.addListener(this);
         infoManager.startReceiving();
         infoManager.startBroadcastingTimedPackets();
