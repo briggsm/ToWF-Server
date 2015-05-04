@@ -248,6 +248,13 @@ public class ListeningClientsTableModel extends AbstractTableModel {
         langPortPairsList = list;
     }
     
+    public void globallyEnableMPRs(boolean enable) {
+        // Enable/Disable MPR's for all current listening clients
+        for (int i = 0; i < listeningClients.size(); i++) {
+            listeningClients.get(i).EnableMPRs = enable;
+        }
+    }
+    
     public void addListener(ListeningClientsTableModelListener listener) {
         listeners.add(listener);
     }

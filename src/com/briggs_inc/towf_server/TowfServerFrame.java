@@ -169,6 +169,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         jScrollPane5 = new javax.swing.JScrollPane();
         listeningClientsTable = new javax.swing.JTable();
         requestListeningStatesBtn = new javax.swing.JButton();
+        globalEnableMPRsCB = new javax.swing.JCheckBox();
         jPanel6 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         chatTA = new javax.swing.JTextArea();
@@ -404,6 +405,14 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
             }
         });
 
+        globalEnableMPRsCB.setSelected(true);
+        globalEnableMPRsCB.setText("Global Enable MPR's");
+        globalEnableMPRsCB.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                globalEnableMPRsCBActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -416,6 +425,8 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                         .addComponent(removeAllListeningClientsBtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(requestListeningStatesBtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(globalEnableMPRsCB)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -425,7 +436,8 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(removeAllListeningClientsBtn)
-                    .addComponent(requestListeningStatesBtn))
+                    .addComponent(requestListeningStatesBtn)
+                    .addComponent(globalEnableMPRsCB))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE)
                 .addContainerGap())
@@ -581,6 +593,14 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         }
     }//GEN-LAST:event_requestListeningStatesBtnActionPerformed
 
+    private void globalEnableMPRsCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_globalEnableMPRsCBActionPerformed
+        if (infoManager != null) {
+            infoManager.sendEnableMPRs((Inet4Address)networkInterfaceIPv4Address.getBroadcast(), globalEnableMPRsCB.isSelected());
+        }
+        lcTableModel.globallyEnableMPRs(globalEnableMPRsCB.isSelected());  // Check/uncheck all Enable MPR's CheckBoxes in the table model
+        lcTableModel.fireTableDataChanged();
+    }//GEN-LAST:event_globalEnableMPRsCBActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -631,6 +651,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
     private javax.swing.JComboBox<String> afSampleRate;
     private javax.swing.JButton btnStartStop;
     private javax.swing.JTextArea chatTA;
+    private javax.swing.JCheckBox globalEnableMPRsCB;
     private javax.swing.JComboBox<String> inputSource1CB;
     private javax.swing.JComboBox<String> inputSource2CB;
     private javax.swing.JComboBox<String> inputSource3CB;

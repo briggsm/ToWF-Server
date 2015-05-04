@@ -505,6 +505,8 @@
                           <Component id="removeAllListeningClientsBtn" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="requestListeningStatesBtn" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="globalEnableMPRsCB" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -519,6 +521,7 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="removeAllListeningClientsBtn" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="requestListeningStatesBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="globalEnableMPRsCB" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="jScrollPane5" pref="232" max="32767" attributes="0"/>
@@ -566,6 +569,15 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="requestListeningStatesBtnActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="globalEnableMPRsCB">
+          <Properties>
+            <Property name="selected" type="boolean" value="true"/>
+            <Property name="text" type="java.lang.String" value="Global Enable MPR&apos;s"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="globalEnableMPRsCBActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>
