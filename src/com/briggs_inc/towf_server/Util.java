@@ -3,6 +3,11 @@ package com.briggs_inc.towf_server;
 
 import static com.briggs_inc.towf_server.PacketConstants.*;
 import java.nio.charset.Charset;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.Line;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
 
 /**
  *
@@ -72,5 +77,26 @@ public class Util {
         }
         
         return new String(allBytes, 0, itr, Charset.forName("US-ASCII"));
+    }
+    
+    public static boolean isThisMixerInfoAnInputMixer (Mixer.Info mixerInfo) {
+        Mixer m = AudioSystem.getMixer(mixerInfo);
+        Line.Info[] lines = m.getTargetLineInfo();  // Lookup just the TARGET line info
+        for (Line.Info li : lines){
+            // Make sure this "target line" is a "DataTargetLine" (AND not a PORT) 'cuz that means this mixer is getting INPUT (from MICROPHONE, etc) & sending that data IN to this program via this "target line"
+            if (li instanceof DataLine.Info) {
+                // If it's usable, add it to our list.
+                try {
+                    m.open();
+                    m.close();
+                    // If we can open & close without exception, this is an input line which can be obtained.
+                    return true;
+                } catch (LineUnavailableException e) {
+                    //System.out.println("Line unavailable.");
+                    // Keep searching...
+                }
+            }
+        }
+        return false;
     }
 }

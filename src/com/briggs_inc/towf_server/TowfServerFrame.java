@@ -867,6 +867,12 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
         
         // We want to find the TARGET lines (output of the mixer, which could be DataLines or Ports), which are DATA LINES (norrows down to only the DataLines).
         for (Mixer.Info mixerInfo : mixers){
+            
+            if (Util.isThisMixerInfoAnInputMixer(mixerInfo)) {
+                availableInputMixers.add(mixerInfo);
+            }
+            
+            /*
             Mixer m = AudioSystem.getMixer(mixerInfo);
             Line.Info[] lines = m.getTargetLineInfo();  // Lookup just the TARGET line info
             for (Line.Info li : lines){
@@ -882,6 +888,7 @@ public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerLi
                     }
                 }
             }
+            */
         }
         
         return availableInputMixers;

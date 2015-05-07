@@ -370,11 +370,42 @@ public class TowfServerThread extends Thread implements LineListener {
         // Search through all mixers until find one with matching "name"
         
         Mixer.Info mixerInfos[] = AudioSystem.getMixerInfo();
+        
         for (Mixer.Info mixerInfo : mixerInfos) {
             if (mixerInfo.getName().equals(mixerName)) {
-                return AudioSystem.getMixer(mixerInfo);
+                // Note: Must be an INPUT mixer only
+                /*
+                Mixer m = AudioSystem.getMixer(mixerInfo);
+                Line.Info[] lines = m.getTargetLineInfo();  // Lookup just the TARGET line info
+                for (Line.Info li : lines){
+                    // Make sure this "target line" is a "DataTargetLine" (AND not a PORT) 'cuz that means this mixer is getting INPUT (from MICROPHONE, etc) & sending that data IN to this program via this "target line"
+                    if (li instanceof DataLine.Info) {
+                        // If it's usable, add it to our list.
+                        try {
+                            m.open();
+                            m.close();
+                            // If we can open & close without exception, this is the one!
+                            return AudioSystem.getMixer(mixerInfo);
+                        } catch (LineUnavailableException e) {
+                            //System.out.println("Line unavailable.");
+                            // Keep searching...
+                        }
+                    }
+                }
+                */
+                if (Util.isThisMixerInfoAnInputMixer(mixerInfo)) {
+                    return AudioSystem.getMixer(mixerInfo);
+                }
             }
         }
+        
+        /*
+        for (int i = 0; i < mixerInfos.length; i++) {
+            if (mixerInfos[i].getName().equals(mixerName)) {
+                return AudioSystem.getMixer(mixerInfos[i+1]);
+            }
+        }
+        */
         return null;
     }
     
