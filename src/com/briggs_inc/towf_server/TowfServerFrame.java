@@ -45,7 +45,7 @@ import javax.swing.table.TableColumn;
 public class TowfServerFrame extends javax.swing.JFrame implements InfoManagerListener, ListeningClientsTableModelListener {
     private static final String TAG = "TowfServerFrame";
     
-    public static final String APP_VERSION = "3.3";
+    public static final String APP_VERSION = "3.4d";
     
     private Preferences prefs;
     
