@@ -18,13 +18,17 @@ public class DescriptiveNetworkInterface {
 
     public DescriptiveNetworkInterface(String name) {
         this.name = name;
+        description = "";
 
         try {
             // If running on OS X, need to do 'hack' to get a nice description.
             if (System.getProperty("os.name").startsWith("Mac")) {
                 description = getHardwarePortForDeviceName(name);
             } else {
-                description = NetworkInterface.getByName(name).getDisplayName();
+                NetworkInterface ni = NetworkInterface.getByName(name);
+                if (ni != null) {
+                    description = ni.getDisplayName();
+                }
             }
         } catch (SocketException ex) {
             Logger.getLogger(DescriptiveNetworkInterface.class.getName()).log(Level.SEVERE, null, ex);
